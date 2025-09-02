@@ -86,6 +86,23 @@ canvas{max-width:100%;width:100%;height:auto;border-radius:16px}
     </div>
     <small id="catalogInfo"></small>
 
+    <!-- 3.1) VIDRIO -->
+    <hr><h3>3.1) Vidrio</h3>
+    <div class="row">
+      <div>
+        <label>¿Lleva vidrio?</label>
+        <select id="glass">
+          <option value="none" selected>Sin vidrio</option>
+          <option value="2mm">Vidrio 2 mm</option>
+          <option value="3mm">Vidrio 3 mm</option>
+        </select>
+      </div>
+      <div>
+        <label>Nota</label>
+        <input type="text" value="Se calcula con fórmula del proveedor" disabled>
+      </div>
+    </div>
+
     <hr><h3>4) WhatsApp</h3>
     <div><label>Tu nombre (requerido)</label><input id="name" type="text" placeholder="Tu nombre" required></div>
     <button class="btn" id="wa">Enviar solicitud por WhatsApp</button>
@@ -126,6 +143,7 @@ function makeTextureCanvas(color, style='smooth', w=80, h=80){
   if(style==='grain'){g.fillStyle='rgba(255,255,255,.05)'; for(let y=0;y<h;y+=2){g.fillRect(0,y,w,1);} g.fillStyle='rgba(0,0,0,.04)'; for(let x=0;x<w;x+=6){g.fillRect(x,0,1,h);} }
   return c;
 }
+function money(n){ try{return n.toLocaleString('es-MX',{minimumFractionDigits:0,maximumFractionDigits:0});}catch(e){return Math.round(n).toString();} }
 
 // ===== Catálogos LITE embebidos =====
 const LITE_PAPERS = [
@@ -140,7 +158,6 @@ const LITE_PAPERS = [
   {id:"B79", name:"B79 Yorktown Blue",color:"#6289b7",style:"smooth"},
   {id:"B403",name:"B403 Pure White",color:"#ffffff",style:"smooth"}
 ];
-
 const LITE_MOLDS = [
   {id:"NEG-30",name:"Negro · 3 cm",width_cm:3,color:"#111111",style:"grain"},
   {id:"NEG-40",name:"Negro · 4 cm",width_cm:4,color:"#111111",style:"grain"},
@@ -151,7 +168,7 @@ const LITE_MOLDS = [
   {id:"GRI-25",name:"Gris · 2.5 cm",width_cm:2.5,color:"#777777",style:"grain"},
   {id:"WNG-30",name:"Wengué · 3 cm",width_cm:3,color:"#3a2a1a",style:"grain"},
   {id:"ROBL-30",name:"Roble · 3 cm",width_cm:3,color:"#916c44",style:"grain"},
-  {id:"ANT-35",name:"Antique Gold · 3.5 cm",width_cm:3.5,color:"#b99652",style:"metal"},
+  {id:"ANT-35",name:"Antique Gold · 3.5 cm",width_cm:3.5,color:"#b99652",style:"metal"}
 ];
 
 // ===== Intento de cargar catálogos externos (si existen en /data/) =====
@@ -198,7 +215,11 @@ function populate(){
     draw();
   };
 }
-['w','h','mat','frame','matOn','matColor','frameColor'].forEach(id=>document.getElementById(id).addEventListener('input',draw));
+
+// escuchar cambios
+['w','h','mat','frame','matOn','matColor','frameColor','glass'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',draw);
+});
 
 // carga de imagen (con redimensionado si es muy grande)
 document.getElementById('file').addEventListener('change',e=>{
@@ -235,7 +256,7 @@ function draw(){
   const margin=80; const scale=Math.min((W-2*margin)/extW,(H-2*margin)/extH);
   const ex=extW*scale, ey=extH*scale; const cx=W/2, cy=H/2;
 
-  // marco (con “volumen” usando gradiente)
+  // marco (con volumen sutil)
   const grad=ctx.createLinearGradient(0,cy-ey/2,0,cy+ey/2);
   grad.addColorStop(0,shade(frameColor,18)); grad.addColorStop(0.2,shade(frameColor,8));
   grad.addColorStop(0.5,frameColor); grad.addColorStop(0.8,shade(frameColor,-10)); grad.addColorStop(1,shade(frameColor,-20));
@@ -245,7 +266,6 @@ function draw(){
 
   // marialuisa
   if(mat>0){
-    // textura procedural según color + estilo aproximado
     const paper = (document.getElementById('matPreset').value && PAPERS.find(p=>p.id===document.getElementById('matPreset').value)) || null;
     const style = paper ? paper.style : 'smooth';
     const tex = makeTextureCanvas(matColor, style, Math.ceil(cxw), Math.ceil(cyh));
@@ -285,15 +305,27 @@ document.getElementById('wa').addEventListener('click',()=>{
   const frame=(parseFloat(document.getElementById('frame').value)||3);
   const contentW=aWcm+2*mat, contentH=aHcm+2*mat;
   const extW=contentW+2*frame, extH=contentH+2*frame;
+
+  // Vidrio (cálculo simple proveedor)
+  const glass=document.getElementById('glass').value;
+  let glassText='No', glassCost=0;
+  if(glass==='2mm'){ glassText='2 mm'; glassCost=0.04*aWcm*aHcm; }
+  if(glass==='3mm'){ glassText='3 mm'; glassCost=0.06*aWcm*aHcm; }
+
   const matPreset=document.getElementById('matPreset');
-  const matText=matPreset.value?matPreset.selectedOptions[0].text:document.getElementById('matColor').selectedOptions[0].text;
+  const matText=mat>0 ? (matPreset.value?matPreset.selectedOptions[0].text:document.getElementById('matColor').selectedOptions[0].text) : 'No';
   const frameColorText=document.getElementById('frameColor').selectedOptions[0].text;
-  const msg=`Hola soy ${name}. Quiero cotizar un enmarcado:%0A`+
-            `Obra: ${aWcm}×${aHcm} cm%0A`+
-            `Marialuisa: ${mat>0?(mat+' cm, '+matText):'No'}%0A`+
-            `Marco: ${frame} cm, ${frameColorText}%0A`+
-            `Exterior aprox.: ${extW.toFixed(1)}×${extH.toFixed(1)} cm%0A`+
-            `Nota: Precio aproximado sujeto a tipo de cambio y mercado.`;
+
+  const glassLine = (glass==='none') ? 'No' : `${glassText} — aprox $${money(glassCost)} MXN`;
+
+  const msg=`Hola soy ${name}. Quiero cotizar un enmarcado:%0A`
+    + `Obra: ${aWcm}×${aHcm} cm%0A`
+    + `Marialuisa: ${mat>0?(mat+' cm, '+matText):'No'}%0A`
+    + `Marco: ${frame} cm, ${frameColorText}%0A`
+    + `Vidrio: ${glassLine}%0A`
+    + `Exterior aprox.: ${extW.toFixed(1)}×${extH.toFixed(1)} cm%0A`
+    + `Nota: Precio aproximado sujeto a tipo de cambio y mercado.`;
+
   window.open(`https://wa.me/${BUSINESS_WA}?text=${msg}`,'_blank');
 });
 
