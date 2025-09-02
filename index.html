@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cotizador Marcos Vallarta · Live</title>
+<style>
+:root{--brand:#41b8c4;--ink:#142022;--bg:#f7f9fa;--card:#fff;--border:#dfe6ea}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,Segoe UI,Roboto,Inter,Arial;background:var(--bg);color:var(--ink)}
+header{display:flex;gap:10px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border);background:#fff}
+main{display:grid;grid-template-columns:360px 1fr;gap:16px;padding:16px;min-height:calc(100dvh - 60px)}
+@media(max-width:980px){main{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;box-shadow:0 4px 18px rgba(0,0,0,.05)}
+label{font-size:12px;color:#5d7378;display:block;margin-bottom:6px}
+input[type="number"],select,input[type="text"]{width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:10px;background:#fff}
+input[type="file"]{width:100%}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{appearance:none;border:0;border-radius:10px;background:var(--brand);color:#042629;padding:10px 12px;font-weight:700;cursor:pointer}
+.ghost{background:#eef5f6;color:#0d1e20;border:1px solid var(--border)}
+small{color:#5d7378}
+#stage{background:#eaf1f3;border:1px solid var(--border);border-radius:16px;position:relative;aspect-ratio:16/10;display:grid;place-items:center}
+canvas{max-width:100%;width:100%;height:auto;border-radius:16px}
+.kpi{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.kpi>div{background:#f2f7f8;border:1px solid var(--border);border-radius:10px;padding:8px;text-align:center}
+.badge{display:inline-block;background:#e9f6f8;border:1px solid var(--border);padding:2px 8px;border-radius:999px;color:#0d3136;font-size:12px}
+</style>
+</head>
+<body>
+<header>
+  <strong>Marcos Vallarta</strong><span style="color:#5d7378">· Cotizador (Live)</span>
+</header>
+
+<main>
+  <section class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h3 style="margin:6px 0">1) Sube la foto de tu obra</h3>
+      <span class="badge">beta</span>
+    </div>
+    <input id="file" type="file" accept="image/*">
+    <div class="row" style="margin-top:6px">
+      <div><label>Ancho de la obra (cm)</label><input id="w" type="number" min="5" value="40"></div>
+      <div><label>Alto de la obra (cm)</label><input id="h" type="number" min="5" value="60"></div>
+    </div>
+
+    <hr><h3>2) Marialuisa / Paspartú</h3>
+    <div class="row">
+      <div><label>¿Lleva paspartú?</label>
+        <select id="matOn"><option value="si" selected>Sí</option><option value="no">No</option></select>
+      </div>
+      <div><label>Ancho (cm)</label><input id="mat" type="number" value="5" min="0" step="0.5"></div>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <div>
+        <label>Color / Preajustes</label>
+        <select id="matPreset"><option value="">— Elegir —</option></select>
+      </div>
+      <div>
+        <label>Color rápido</label>
+        <select id="matColor">
+          <option value="#f5f5f5" selected>Blanco</option>
+          <option value="#111111">Negro</option>
+          <option value="#eae0c8">Crema</option>
+          <option value="#1f3a5a">Azul</option>
+          <option value="#5e7f6b">Verde</option>
+          <option value="#6a4b8a">Morado</option>
+          <option value="#c7a446">Dorado</option>
+          <option value="#9aa0a6">Gris</option>
+        </select>
+      </div>
+    </div>
+
+    <hr><h3>3) Marco</h3>
+    <div class="row">
+      <div><label>Perfil (cm)</label><input id="frame" type="number" value="3" min="0.5" step="0.5"></div>
+      <div><label>Color base</label>
+        <select id="frameColor">
+          <option value="#111111" selected>Negro</option>
+          <option value="#f5f5f5">Blanco</option>
+          <option value="#6b3f21">Nogal</option>
+          <option value="#c7a446">Dorado</option>
+          <option value="#c0c0c0">Plata</option>
+        </select>
+      </div>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <div><label>Moldura del catálogo</label><select id="moldSel"></select></div>
+      <div><label>Miniatura</label><canvas id="moldThumb" width="120" height="40" style="border:1px solid var(--border);border-radius:8px"></canvas></div>
+    </div>
+    <small id="catalogInfo"></small>
+
+    <hr><h3>4) WhatsApp</h3>
+    <div><label>Tu nombre (requerido)</label><input id="name" type="text" placeholder="Tu nombre" required></div>
+    <button class="btn" id="wa">Enviar solicitud por WhatsApp</button>
+    <small>Se abrirá WhatsApp con el mensaje. Precio aproximado sujeto a tipo de cambio y mercado.</small>
+
+    <hr><div class="row">
+      <button class="btn ghost" id="save">Descargar imagen simulada (PNG)</button>
+      <button class="btn ghost" id="reset">Reiniciar</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <div id="stage"><canvas id="cv" width="1200" height="750"></canvas></div>
+    <div class="kpi">
+      <div><div>Exterior (cm)</div><strong id="ext"></strong></div>
+      <div><div>Área visible (cm)</div><strong id="vis"></strong></div>
+    </div>
+  </section>
+</main>
+
+<script>
+// ===== Config =====
+const BUSINESS_WA = '523329231790';
+
+// ===== Util =====
+const cv = document.getElementById('cv'); const ctx = cv.getContext('2d');
+const artImg = new Image(); let imgLoaded = false;
+function shade(hex,pct){const c=hex.replace('#','');const num=parseInt(c.length===3?c.split('').map(x=>x+x).join(''):c,16);let r=(num>>16)&255,g=(num>>8)&255,b=num&255;r=Math.min(255,Math.max(0,Math.round(r+(pct/100)*255)));g=Math.min(255,Math.max(0,Math.round(g+(pct/100)*255)));b=Math.min(255,Math.max(0,Math.round(b+(pct/100)*255)));return '#'+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1);}
+function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();}
+function makeTextureCanvas(color, style='smooth', w=80, h=80){
+  const c=document.createElement('canvas'); c.width=w; c.height=h; const g=c.getContext('2d');
+  g.fillStyle=color; g.fillRect(0,0,w,h);
+  if(style==='linen'){g.strokeStyle='rgba(0,0,0,.08)'; for(let i=0;i<w;i+=6){g.beginPath();g.moveTo(i,0);g.lineTo(i,h);g.stroke();}
+                      g.strokeStyle='rgba(255,255,255,.07)'; for(let j=0;j<h;j+=6){g.beginPath();g.moveTo(0,j);g.lineTo(w,j);g.stroke();}}
+  if(style==='speckle'){g.fillStyle='rgba(0,0,0,.12)'; for(let k=0;k<420;k++){const x=Math.random()*w,y=Math.random()*h; g.fillRect(x,y,1,1);}}
+  if(style==='fiber'){g.strokeStyle='rgba(0,0,0,.12)'; for(let k=0;k<28;k++){const x1=Math.random()*w,y1=Math.random()*h,x2=x1+Math.random()*20,y2=y1+Math.random()*6; g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();}}
+  if(style==='metal'){for(let y=0;y<h;y++){const s=200+25*Math.sin(y/6); g.fillStyle=`rgb(${s|0},${s|0},${s|0})`; g.fillRect(0,y,w,1);} }
+  if(style==='grain'){g.fillStyle='rgba(255,255,255,.05)'; for(let y=0;y<h;y+=2){g.fillRect(0,y,w,1);} g.fillStyle='rgba(0,0,0,.04)'; for(let x=0;x<w;x+=6){g.fillRect(x,0,1,h);} }
+  return c;
+}
+
+// ===== Catálogos LITE embebidos =====
+const LITE_PAPERS = [
+  {id:"B402",name:"B402 Polar White (Black Core)",color:"#f5f5f5",style:"smooth"},
+  {id:"B222",name:"B222 Smooth White",color:"#f7f8f7",style:"smooth"},
+  {id:"B8-508",name:"B8-508 Ecru",color:"#eae0c8",style:"fiber"},
+  {id:"B504",name:"B504 Buff",color:"#b5895a",style:"speckle"},
+  {id:"B545",name:"B545 Deep Blue",color:"#1f3a5a",style:"smooth"},
+  {id:"B703",name:"B703 Marzipan",color:"#e0d6b8",style:"smooth"},
+  {id:"B528",name:"B528 Jade",color:"#5e7f6b",style:"smooth"},
+  {id:"B548",name:"B548 Pansy",color:"#6a4b8a",style:"smooth"},
+  {id:"B79", name:"B79 Yorktown Blue",color:"#6289b7",style:"smooth"},
+  {id:"B403",name:"B403 Pure White",color:"#ffffff",style:"smooth"}
+];
+
+const LITE_MOLDS = [
+  {id:"NEG-30",name:"Negro · 3 cm",width_cm:3,color:"#111111",style:"grain"},
+  {id:"NEG-40",name:"Negro · 4 cm",width_cm:4,color:"#111111",style:"grain"},
+  {id:"BLA-30",name:"Blanco · 3 cm",width_cm:3,color:"#f5f5f5",style:"grain"},
+  {id:"NOG-35",name:"Nogal · 3.5 cm",width_cm:3.5,color:"#6b3f21",style:"grain"},
+  {id:"DOR-30",name:"Dorado · 3 cm",width_cm:3,color:"#c7a446",style:"metal"},
+  {id:"PLA-30",name:"Plata · 3 cm",width_cm:3,color:"#c0c0c0",style:"metal"},
+  {id:"GRI-25",name:"Gris · 2.5 cm",width_cm:2.5,color:"#777777",style:"grain"},
+  {id:"WNG-30",name:"Wengué · 3 cm",width_cm:3,color:"#3a2a1a",style:"grain"},
+  {id:"ROBL-30",name:"Roble · 3 cm",width_cm:3,color:"#916c44",style:"grain"},
+  {id:"ANT-35",name:"Antique Gold · 3.5 cm",width_cm:3.5,color:"#b99652",style:"metal"},
+];
+
+// ===== Intento de cargar catálogos externos (si existen en /data/) =====
+const BASE = location.pathname.replace(/[^/]+$/, ''); // path del repo
+let PAPERS = [...LITE_PAPERS], MOLDURAS = [...LITE_MOLDS];
+
+Promise.all([
+  fetch(BASE+'data/cartulinas.json').then(r=>r.ok?r.json():null).catch(()=>null),
+  fetch(BASE+'data/molduras.json').then(r=>r.ok?r.json():null).catch(()=>null),
+]).then(([pp,mm])=>{
+  const info = document.getElementById('catalogInfo');
+  if(pp && Array.isArray(pp) && pp.length){ PAPERS = pp; }
+  if(mm && Array.isArray(mm) && mm.length){ MOLDURAS = mm; }
+  info.textContent = `Catálogo activo: Cartulinas ${PAPERS.length} · Molduras ${MOLDURAS.length}` + ((pp||mm)?' (desde /data)':' (embebido)');
+  populate();
+}).catch(()=>populate());
+
+// ===== UI =====
+function populate(){
+  const matPreset = document.getElementById('matPreset');
+  matPreset.innerHTML = '<option value="">— Elegir —</option>' + PAPERS.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+  matPreset.onchange = ()=>{
+    const it = PAPERS.find(x=>x.id===matPreset.value);
+    if(!it) return;
+    document.getElementById('matColor').value = it.color;
+    draw();
+  };
+
+  const moldSel = document.getElementById('moldSel');
+  moldSel.innerHTML = '<option value="">— Elegir —</option>' + MOLDURAS.map(m=>`<option value="${m.id}">${m.name}</option>`).join('');
+  moldSel.onchange = ()=>{
+    const m = MOLDURAS.find(x=>x.id===moldSel.value);
+    if(m){
+      document.getElementById('frame').value = m.width_cm || 3;
+      document.getElementById('frameColor').value = m.color || '#111';
+      // pintar miniatura
+      const t = document.getElementById('moldThumb'), g=t.getContext('2d');
+      g.clearRect(0,0,t.width,t.height);
+      const tex = makeTextureCanvas(m.color, m.style||'grain', t.width, t.height);
+      g.drawImage(tex,0,0);
+    } else {
+      const t = document.getElementById('moldThumb'), g=t.getContext('2d'); g.clearRect(0,0,t.width,t.height);
+    }
+    draw();
+  };
+}
+['w','h','mat','frame','matOn','matColor','frameColor'].forEach(id=>document.getElementById(id).addEventListener('input',draw));
+
+// carga de imagen (con redimensionado si es muy grande)
+document.getElementById('file').addEventListener('change',e=>{
+  const f=e.target.files&&e.target.files[0]; if(!f) return;
+  const url=URL.createObjectURL(f);
+  const tmp=new Image();
+  tmp.onload=()=>{
+    let src=url; const maxDim=5000;
+    if(tmp.naturalWidth>maxDim || tmp.naturalHeight>maxDim){
+      const off=document.createElement('canvas'); const sc=Math.min(maxDim/tmp.naturalWidth,maxDim/tmp.naturalHeight);
+      off.width=Math.round(tmp.naturalWidth*sc); off.height=Math.round(tmp.naturalHeight*sc);
+      off.getContext('2d').drawImage(tmp,0,0,off.width,off.height);
+      src=off.toDataURL('image/jpeg',0.9);
+    }
+    artImg.onload=()=>{ imgLoaded=true; draw(); };
+    artImg.src=src;
+  };
+  tmp.src=url;
+});
+
+// render
+function draw(){
+  const W=cv.width,H=cv.height; ctx.clearRect(0,0,W,H); ctx.fillStyle='#eaf1f3'; ctx.fillRect(0,0,W,H);
+  const artW=parseFloat(document.getElementById('w').value)||40;
+  const artH=parseFloat(document.getElementById('h').value)||60;
+  const matOn=document.getElementById('matOn').value==='si';
+  const mat=matOn?Math.max(0,parseFloat(document.getElementById('mat').value)||0):0;
+  const matColor=document.getElementById('matColor').value;
+  const frame=Math.max(0.5,parseFloat(document.getElementById('frame').value)||3);
+  const frameColor=document.getElementById('frameColor').value;
+
+  const contentW=artW+2*mat, contentH=artH+2*mat;
+  const extW=contentW+2*frame, extH=contentH+2*frame;
+  const margin=80; const scale=Math.min((W-2*margin)/extW,(H-2*margin)/extH);
+  const ex=extW*scale, ey=extH*scale; const cx=W/2, cy=H/2;
+
+  // marco (con “volumen” usando gradiente)
+  const grad=ctx.createLinearGradient(0,cy-ey/2,0,cy+ey/2);
+  grad.addColorStop(0,shade(frameColor,18)); grad.addColorStop(0.2,shade(frameColor,8));
+  grad.addColorStop(0.5,frameColor); grad.addColorStop(0.8,shade(frameColor,-10)); grad.addColorStop(1,shade(frameColor,-20));
+  ctx.fillStyle=grad; roundRect(ctx,cx-ex/2,cy-ey/2,ex,ey,8); ctx.fill();
+  const cxw=contentW*scale, cyh=contentH*scale; ctx.save(); ctx.globalCompositeOperation='destination-out';
+  roundRect(ctx,cx-cxw/2,cy-cyh/2,cxw,cyh,6); ctx.fill(); ctx.restore();
+
+  // marialuisa
+  if(mat>0){
+    // textura procedural según color + estilo aproximado
+    const paper = (document.getElementById('matPreset').value && PAPERS.find(p=>p.id===document.getElementById('matPreset').value)) || null;
+    const style = paper ? paper.style : 'smooth';
+    const tex = makeTextureCanvas(matColor, style, Math.ceil(cxw), Math.ceil(cyh));
+    const pat = ctx.createPattern(tex,'repeat');
+    ctx.fillStyle=pat; roundRect(ctx,cx-cxw/2,cy-cyh/2,cxw,cyh,6); ctx.fill();
+    const aw=artW*scale, ah=artH*scale; ctx.save(); ctx.globalCompositeOperation='destination-out';
+    roundRect(ctx,cx-aw/2,cy-ah/2,aw,ah,4); ctx.fill(); ctx.restore();
+  }
+
+  // obra
+  if(imgLoaded){
+    const aw=artW*scale, ah=artH*scale; ctx.save(); roundRect(ctx,cx-aw/2,cy-ah/2,aw,ah,4); ctx.clip();
+    const ir=artImg.naturalWidth/artImg.naturalHeight, ar=aw/ah; let dw,dh;
+    if(ir>ar){dh=ah; dw=dh*ir;} else {dw=aw; dh=dw/ir;}
+    ctx.drawImage(artImg, cx-dw/2, cy-dh/2, dw, dh); ctx.restore();
+  }
+
+  document.getElementById('ext').textContent = extW.toFixed(1)+' × '+extH.toFixed(1);
+  document.getElementById('vis').textContent = artW.toFixed(1)+' × '+artH.toFixed(1)+(mat>0?` (+ ML ${mat.toFixed(1)} cm)`:'');
+}
+
+// guardar PNG
+document.getElementById('save').addEventListener('click',()=>{
+  const a=document.createElement('a'); a.download='cotizador_marco.png'; a.href=cv.toDataURL('image/png'); a.click();
+});
+
+// reset
+document.getElementById('reset').addEventListener('click',()=>{imgLoaded=false; artImg.src=''; document.getElementById('file').value=''; draw();});
+
+// WhatsApp
+document.getElementById('wa').addEventListener('click',()=>{
+  const name=(document.getElementById('name').value||'').trim(); if(!name){alert('Escribe tu nombre'); return;}
+  const aWcm=parseFloat(document.getElementById('w').value)||40;
+  const aHcm=parseFloat(document.getElementById('h').value)||60;
+  const matOn=document.getElementById('matOn').value==='si';
+  const mat=matOn?(parseFloat(document.getElementById('mat').value)||0):0;
+  const frame=(parseFloat(document.getElementById('frame').value)||3);
+  const contentW=aWcm+2*mat, contentH=aHcm+2*mat;
+  const extW=contentW+2*frame, extH=contentH+2*frame;
+  const matPreset=document.getElementById('matPreset');
+  const matText=matPreset.value?matPreset.selectedOptions[0].text:document.getElementById('matColor').selectedOptions[0].text;
+  const frameColorText=document.getElementById('frameColor').selectedOptions[0].text;
+  const msg=`Hola soy ${name}. Quiero cotizar un enmarcado:%0A`+
+            `Obra: ${aWcm}×${aHcm} cm%0A`+
+            `Marialuisa: ${mat>0?(mat+' cm, '+matText):'No'}%0A`+
+            `Marco: ${frame} cm, ${frameColorText}%0A`+
+            `Exterior aprox.: ${extW.toFixed(1)}×${extH.toFixed(1)} cm%0A`+
+            `Nota: Precio aproximado sujeto a tipo de cambio y mercado.`;
+  window.open(`https://wa.me/${BUSINESS_WA}?text=${msg}`,'_blank');
+});
+
+draw();
+</script>
+</body></html>
