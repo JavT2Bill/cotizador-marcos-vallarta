@@ -6,6 +6,7 @@ Descarga imágenes de molduras desde marcosymarcos.mx y genera data/molduras_scr
 - Si no hay SKU, usa el slug de la URL como id
 - Intenta detectar ancho en cm del título (p. ej. "3.0 cm")
 - color/style heurísticos por palabras clave (sirven como fallback)
+- Marca 'ornate' si el producto es de Versalles o Atenas
 """
 
 import os, re, json, time
@@ -18,9 +19,6 @@ CATEGORIAS = [
     "https://www.marcosymarcos.mx/categoria/molduras/poliestireno/",
     "https://www.marcosymarcos.mx/categoria/molduras/poliestireno/versalles/",
     "https://www.marcosymarcos.mx/categoria/molduras/poliestireno/coleccion-molduras-marcos-atenas/",
-]
-# Agrega más categorías si quieres cubrir todo
-    # "https://www.marcosymarcos.mx/categoria/molduras/",
 ]
 
 OUT_DIR = "img/molduras"
@@ -46,8 +44,9 @@ def slug_from_url(url):
 
 def clean_id(text):
     text = (text or "").strip().upper()
-    # Deja letras, números y guiones/guiones bajos
     text = re.sub(r"[^A-Z0-9_-]+", "", text)
+    # Si quieres dedupe TRA-01 == TRA01 en el JSON, descomenta:
+    # text = text.replace("-", "")
     return text or None
 
 def parse_width_cm(text):
@@ -112,6 +111,7 @@ def find_product_links(cat_url):
 
 def extract_product(url):
     soup = get_soup(url)
+
     title_el = soup.select_one("h1.product_title, h1.entry-title")
     title = title_el.get_text(" ", strip=True) if title_el else slug_from_url(url)
 
@@ -136,6 +136,12 @@ def extract_product(url):
 
     width_cm = parse_width_cm(title)
     style, color = guess_style_and_color(title)
+
+    # --- Mejora rápida: marcar 'ornate' si es Versalles/Atenas ---
+    path_lower = url.lower()
+    title_lower = title.lower()
+    if "versalles" in path_lower or "atenas" in path_lower or "versalles" in title_lower or "atenas" in title_lower:
+        style = "ornate"
 
     return {
         "id": sku,
@@ -190,7 +196,6 @@ def main():
                 print("Error en", purl, e)
 
     out = list(products.values())
-    # genera JSON (no pisa data/molduras.json existente)
     with open(OUT_JSON, "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, indent=2)
     print("Listo:", OUT_JSON, "=>", len(out), "molduras")
