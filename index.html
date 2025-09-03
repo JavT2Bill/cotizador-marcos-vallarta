@@ -133,7 +133,7 @@ const BUSINESS_WA = '523329231790';
 const cv = document.getElementById('cv'); const ctx = cv.getContext('2d');
 const artImg = new Image(); let imgLoaded = false;
 
-function validHex(h){return /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(h||'');}
+const validHex = h => /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(h||'');
 function shade(hex,pct){
   if(!validHex(hex)) hex='#555555';
   const c=hex.replace('#','');const num=parseInt(c.length===3?c.split('').map(x=>x+x).join(''):c,16);
@@ -144,19 +144,8 @@ function shade(hex,pct){
   return '#'+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1);
 }
 function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();}
-function makeTextureCanvas(color, style='smooth', w=80, h=80){
-  const c=document.createElement('canvas'); c.width=w; c.height=h; const g=c.getContext('2d');
-  g.fillStyle=validHex(color)?color:'#dddddd'; g.fillRect(0,0,w,h);
-  if(style==='linen'){g.strokeStyle='rgba(0,0,0,.08)'; for(let i=0;i<w;i+=6){g.beginPath();g.moveTo(i,0);g.lineTo(i,h);g.stroke();}
-                      g.strokeStyle='rgba(255,255,255,.07)'; for(let j=0;j<h;j+=6){g.beginPath();g.moveTo(0,j);g.lineTo(w,j);g.stroke();}}
-  if(style==='speckle'){g.fillStyle='rgba(0,0,0,.12)'; for(let k=0;k<420;k++){g.fillRect(Math.random()*w,Math.random()*h,1,1);}}
-  if(style==='fiber'){g.strokeStyle='rgba(0,0,0,.12)'; for(let k=0;k<28;k++){const x1=Math.random()*w,y1=Math.random()*h,x2=x1+Math.random()*20,y2=y1+Math.random()*6; g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();}}
-  if(style==='metal'){for(let y=0;y<h;y++){const s=200+25*Math.sin(y/6); g.fillStyle=`rgb(${s|0},${s|0},${s|0})`; g.fillRect(0,y,w,1);} }
-  if(style==='grain'){g.fillStyle='rgba(255,255,255,.05)'; for(let y=0;y<h;y+=2){g.fillRect(0,y,w,1);} g.fillStyle='rgba(0,0,0,.04)'; for(let x=0;x<w;x+=6){g.fillRect(x,0,1,h);} }
-  return c;
-}
 function luma(hex){ if(!validHex(hex)) return 128; const c=hex.replace('#',''); const n=parseInt(c.length===3?c.split('').map(x=>x+x).join(''):c,16); const r=(n>>16)&255,g=(n>>8)&255,b=n&255; return 0.2126*r+0.7152*g+0.0722*b; }
-function contrastStroke(hex){ return luma(hex)>200 ? 'rgba(0,0,0,.28)' : 'rgba(255,255,255,.35)'; }
+const contrastStroke = hex => (luma(hex)>200 ? 'rgba(0,0,0,.28)' : 'rgba(255,255,255,.35)');
 
 /* ====== Catálogos LITE embebidos (ampliado) ====== */
 const LITE_PAPERS = [
@@ -172,8 +161,9 @@ const LITE_PAPERS = [
   {id:"B403",name:"B403 Pure White",color:"#ffffff",style:"smooth"}
 ];
 
-// más de 30 molduras de ejemplo (claves proveedor)
+// Molduras “lite”: Tradicionales + Versalles + Atenas (ids estilo proveedor para que coincidan con el scraper)
 const LITE_MOLDS = [
+  // Tradicional (TRA…)
   {id:"TRA-01",name:"Negro",width_cm:2.0,color:"#111111",style:"grain"},
   {id:"TRA-02",name:"Nogal",width_cm:2.0,color:"#6b3f21",style:"grain"},
   {id:"TRA-03",name:"Caoba",width_cm:2.0,color:"#7a3b1f",style:"grain"},
@@ -183,37 +173,44 @@ const LITE_MOLDS = [
   {id:"TRA-07",name:"Chocolate",width_cm:2.3,color:"#4b2b1a",style:"grain"},
   {id:"TRA-08",name:"Nogal",width_cm:3.9,color:"#6b3f21",style:"grain"},
   {id:"TRA-09",name:"Caoba",width_cm:3.9,color:"#7a3b1f",style:"grain"},
-  {id:"NAT-07",name:"Natural",width_cm:4.4,color:"#c9b18c",style:"grain"},
-  {id:"NAT-08",name:"Maple",width_cm:4.4,color:"#e0b977",style:"grain"},
-  {id:"NAT-09",name:"Natural CV",width_cm:2.8,color:"#cfb48e",style:"grain"},
-  {id:"ENT-12",name:"Negro",width_cm:2.8,color:"#111111",style:"grain"},
-  {id:"ENT-18",name:"Plata",width_cm:2.2,color:"#c0c0c0",style:"metal"},
-  {id:"ENT-22",name:"Dorado",width_cm:2.2,color:"#c7a446",style:"metal"},
-  {id:"POP-01",name:"Rojo",width_cm:9.5,color:"#b8222b",style:"grain"},
-  {id:"POP-02",name:"Naranja",width_cm:9.5,color:"#e67e22",style:"grain"},
-  {id:"POP-03",name:"Amarillo",width_cm:9.5,color:"#f4c542",style:"grain"},
-  {id:"POP-04",name:"Azul Cielo",width_cm:9.5,color:"#7db3e6",style:"grain"},
-  {id:"POP-05",name:"Azul Fuerte",width_cm:9.5,color:"#1f3a5a",style:"grain"},
-  {id:"POP-06",name:"Verde",width_cm:9.5,color:"#2e7d32",style:"grain"},
-  {id:"POP-07",name:"Rosa",width_cm:9.5,color:"#d06aa5",style:"grain"},
-  {id:"POP-08",name:"Blanco",width_cm:9.5,color:"#f5f5f5",style:"grain"},
-  {id:"POP-09",name:"Negro",width_cm:9.5,color:"#111111",style:"grain"},
-  {id:"VLS-01",name:"Oro viejo",width_cm:6.5,color:"#b99652",style:"metal"},
-  {id:"VLS-02",name:"Oro liso",width_cm:6.5,color:"#c7a446",style:"metal"},
-  {id:"VLS-03",name:"Plata vieja",width_cm:6.5,color:"#a8a8a8",style:"metal"},
-  {id:"BN-20",name:"Negro",width_cm:2.0,color:"#111111",style:"grain"},
-  {id:"BN-25",name:"Negro",width_cm:2.5,color:"#111111",style:"grain"},
-  {id:"BN-30",name:"Negro",width_cm:3.0,color:"#111111",style:"grain"},
-  {id:"BL-20",name:"Blanco",width_cm:2.0,color:"#f5f5f5",style:"grain"},
-  {id:"BL-25",name:"Blanco",width_cm:2.5,color:"#f5f5f5",style:"grain"},
-  {id:"BL-30",name:"Blanco",width_cm:3.0,color:"#f5f5f5",style:"grain"},
-  {id:"MET-PL-30",name:"Plata",width_cm:3.0,color:"#c0c0c0",style:"metal"},
-  {id:"MET-BR-30",name:"Bronce",width_cm:3.0,color:"#8c6b3f",style:"metal"}
+
+  // VERSALLES (ornamentales/metalizados) — ids estilo “VERSALLES-0X”
+  {id:"VERSALLES-01",name:"Blanco grabado oro",width_cm:6.5,color:"#eae7df",style:"ornate"},
+  {id:"VERSALLES-02",name:"Plateado grabado",width_cm:6.5,color:"#c0c0c0",style:"ornate"},
+  {id:"VERSALLES-03",name:"Dorado grabado",width_cm:6.5,color:"#c7a446",style:"ornate"},
+  {id:"VERSALLES-07",name:"Chocolate con oro",width_cm:6.5,color:"#4b2b1a",style:"ornate"},
+  {id:"VERSALLES-10",name:"Negro con plata",width_cm:6.5,color:"#111111",style:"ornate"},
+  {id:"VERSALLES-11",name:"Negro con oro",width_cm:6.5,color:"#111111",style:"ornate"},
+  {id:"VERSALLES-12",name:"Blanco con plata",width_cm:6.5,color:"#f5f5f5",style:"ornate"},
+
+  // ATENAS (grabadas en varios perfiles) — ids estilo “ATENAS-0X”
+  {id:"ATENAS-01",name:"Grabado clásico dorado",width_cm:5.5,color:"#c7a446",style:"ornate"},
+  {id:"ATENAS-09",name:"Grabado marfil",width_cm:5.5,color:"#efe9da",style:"ornate"},
+  {id:"ATENAS-10",name:"Grabado plata",width_cm:5.5,color:"#c0c0c0",style:"ornate"},
+  {id:"ATENAS-20",name:"Grabado bronce",width_cm:5.5,color:"#8c6b3f",style:"ornate"}
 ];
 
 /* ====== Carga catálogos externos (/data) ====== */
 const BASE = location.pathname.replace(/[^/]+$/, '');
 let PAPERS = [...LITE_PAPERS], MOLDURAS = [...LITE_MOLDS];
+
+// normaliza id (quita separadores, mayúsculas) para dedupe TRA-01 vs TRA01
+const normalizeId = id => (id||'').toString().toUpperCase().replace(/[^A-Z0-9]/g,'');
+
+function mergeAndDedupeNormalized(baseArr, ...others){
+  const map = new Map();
+  const take = (m) => {
+    if(!m || !m.id) return;
+    const key = normalizeId(m.id);
+    const prev = map.get(key) || {};
+    // preferimos datos "scraped" (con img) sobre lite
+    const merged = {...prev, ...m};
+    if(!merged.id) merged.id = m.id; // conserva un id visible
+    map.set(key, merged);
+  };
+  [...baseArr, ...others.flat()].forEach(take);
+  return [...map.values()].sort((a,b)=> (a.id||'').localeCompare(b.id||''));
+}
 
 Promise.all([
   fetch(BASE+'data/cartulinas.json').then(r=>r.ok?r.json():null).catch(()=>null),
@@ -223,32 +220,22 @@ Promise.all([
   const info = document.getElementById('catalogInfo');
   if(pp && Array.isArray(pp) && pp.length){ PAPERS = pp; }
   if(mmScraped && Array.isArray(mmScraped) && mmScraped.length){
-    MOLDURAS = mergeAndDedupe(LITE_MOLDS, mmScraped);
+    MOLDURAS = mergeAndDedupeNormalized(LITE_MOLDS, mmScraped);
   } else if(mmManual && Array.isArray(mmManual) && mmManual.length){
-    MOLDURAS = mergeAndDedupe(LITE_MOLDS, mmManual);
+    MOLDURAS = mergeAndDedupeNormalized(LITE_MOLDS, mmManual);
+  } else {
+    MOLDURAS = mergeAndDedupeNormalized(LITE_MOLDS);
   }
   info.textContent = `Catálogo activo: Cartulinas ${PAPERS.length} · Molduras ${MOLDURAS.length}` + ((pp||mmScraped||mmManual)?' (desde /data)':' (embebido)');
   populate();
 }).catch(()=>populate());
 
-function mergeAndDedupe(a,b){
-  const map=new Map();
-  [...a,...b].forEach(m=>{ if(m && m.id) map.set(m.id, {...map.get(m.id), ...m}); });
-  return [...map.values()];
-}
-
 /* ====================== UI ========================= */
 function setDynamicOption(selectId, value, label, attrName){
   const sel=document.getElementById(selectId);
   let opt=sel.querySelector(`option[${attrName}]`);
-  if(!opt){
-    opt=document.createElement('option');
-    opt.setAttribute(attrName,'1');
-    opt.textContent=label;
-    sel.prepend(opt);
-  }
-  opt.value=value;
-  sel.value=value;
+  if(!opt){ opt=document.createElement('option'); opt.setAttribute(attrName,'1'); opt.textContent=label; sel.prepend(opt); }
+  opt.value=value; sel.value=value;
 }
 function applyCatalogColor(hex){
   setDynamicOption('frameColor', validHex(hex)?hex:'#111111', 'Del catálogo', 'data-catalog');
@@ -265,7 +252,7 @@ function populate(){
     draw();
   };
 
-  // Selector de molduras (clave + nombre + ancho)
+  // Selector de molduras
   const moldSel = document.getElementById('moldSel');
   moldSel.innerHTML = '<option value="">— Elegir —</option>' +
     MOLDURAS.map(m => `<option value="${m.id}">${m.id} · ${m.name}${m.width_cm?` · ${m.width_cm} cm`:''}</option>`).join('');
@@ -274,7 +261,6 @@ function populate(){
     const m = MOLDURAS.find(x=>x.id===moldSel.value);
     const t = document.getElementById('moldThumb'), g=t.getContext('2d');
     g.clearRect(0,0,t.width,t.height);
-
     if(m){
       document.getElementById('frame').value = m.width_cm || 3;
       applyCatalogColor(m.color || '#111111');
@@ -292,12 +278,11 @@ function populate(){
   };
 }
 
-// escuchar cambios
 ['w','h','mat','frame','matOn','matColor','frameColor','glass'].forEach(id=>{
   document.getElementById(id).addEventListener('input',draw);
 });
 
-// carga de imagen con reducción si es gigante
+// carga de imagen (reduce si es enorme)
 document.getElementById('file').addEventListener('change',e=>{
   const f=e.target.files&&e.target.files[0]; if(!f) return;
   const url=URL.createObjectURL(f);
@@ -316,6 +301,62 @@ document.getElementById('file').addEventListener('change',e=>{
   tmp.src=url;
 });
 
+/* ============ Texturas (incluye NUEVA “ornate”) ============ */
+function makeTextureCanvas(color, style='smooth', w=80, h=80){
+  const c=document.createElement('canvas'); c.width=w; c.height=h; const g=c.getContext('2d');
+  g.fillStyle=validHex(color)?color:'#dddddd'; g.fillRect(0,0,w,h);
+
+  if(style==='linen'){
+    g.strokeStyle='rgba(0,0,0,.08)'; for(let i=0;i<w;i+=6){g.beginPath();g.moveTo(i,0);g.lineTo(i,h);g.stroke();}
+    g.strokeStyle='rgba(255,255,255,.07)'; for(let j=0;j<h;j+=6){g.beginPath();g.moveTo(0,j);g.lineTo(w,j);g.stroke();}
+  }
+  if(style==='speckle'){
+    g.fillStyle='rgba(0,0,0,.12)'; for(let k=0;k<420;k++){g.fillRect(Math.random()*w,Math.random()*h,1,1);}
+  }
+  if(style==='fiber'){
+    g.strokeStyle='rgba(0,0,0,.12)'; for(let k=0;k<28;k++){const x1=Math.random()*w,y1=Math.random()*h,x2=x1+Math.random()*20,y2=y1+Math.random()*6; g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();}
+  }
+  if(style==='metal'){
+    for(let y=0;y<h;y++){const s=200+25*Math.sin(y/6); g.fillStyle=`rgb(${s|0},${s|0},${s|0})`; g.fillRect(0,y,w,1);}
+  }
+  if(style==='grain'){
+    g.fillStyle='rgba(255,255,255,.05)'; for(let y=0;y<h;y+=2){g.fillRect(0,y,w,1);}
+    g.fillStyle='rgba(0,0,0,.04)'; for(let x=0;x<w;x+=6){g.fillRect(x,0,1,h);}
+  }
+  if(style==='ornate'){
+    // base suave
+    g.globalAlpha=0.92; for(let y=0;y<h;y++){const s=10+5*Math.sin(y/8); g.fillStyle=`rgba(0,0,0,${(s/255)*.10})`; g.fillRect(0,y,w,1);}
+    g.globalAlpha=1;
+
+    // motivo repetido (hojitas & curvas)
+    g.strokeStyle='rgba(0,0,0,.18)'; g.lineWidth=0.8;
+    for(let y=6;y<h;y+=12){
+      for(let x=6;x<w;x+=16){
+        g.beginPath();
+        g.arc(x,y,3,0,Math.PI*1.5,false);
+        g.stroke();
+        g.beginPath();
+        g.moveTo(x+3,y+3); g.quadraticCurveTo(x+7,y+1,x+10,y+5); g.stroke();
+      }
+    }
+    // puntos brillo
+    g.fillStyle='rgba(255,255,255,.22)';
+    for(let i=0;i<Math.ceil(w*h/120);i++){ g.fillRect(Math.random()*w,Math.random()*h,1,1); }
+
+    // veladura metálica si color “dorado/plata”
+    const isGold = (color||'').toLowerCase().includes('c7a446');
+    const isSilver = (color||'').toLowerCase().includes('c0c0c0') || (color||'').toLowerCase().includes('f5f5f5');
+    if(isGold||isSilver){
+      const grad=g.createLinearGradient(0,0,w,h);
+      grad.addColorStop(0,'rgba(255,255,255,.10)');
+      grad.addColorStop(0.5,'rgba(0,0,0,.08)');
+      grad.addColorStop(1,'rgba(255,255,255,.10)');
+      g.fillStyle=grad; g.fillRect(0,0,w,h);
+    }
+  }
+  return c;
+}
+
 /* ===================== RENDER ====================== */
 function draw(){
   const W=cv.width,H=cv.height; ctx.clearRect(0,0,W,H); ctx.fillStyle='#eaf1f3'; ctx.fillRect(0,0,W,H);
@@ -332,54 +373,51 @@ function draw(){
   const margin=80; const scale=Math.min((W-2*margin)/extW,(H-2*margin)/extH);
   const ex=extW*scale, ey=extH*scale; const cx=W/2, cy=H/2;
 
-  // sombra y relleno del marco
+  // MARCO — gradiente/bevel
   ctx.save();
   ctx.shadowColor='rgba(0,0,0,.12)'; ctx.shadowBlur=18; ctx.shadowOffsetY=8;
   const grad=ctx.createLinearGradient(0,cy-ey/2,0,cy+ey/2);
   grad.addColorStop(0,shade(frameColor,18)); grad.addColorStop(0.2,shade(frameColor,8));
   grad.addColorStop(0.5,validHex(frameColor)?frameColor:'#555555');
   grad.addColorStop(0.8,shade(frameColor,-10)); grad.addColorStop(1,shade(frameColor,-22));
-  ctx.fillStyle=grad; roundRect(ctx,cx-ex/2,cy-ey/2,ex,ey,8); ctx.fill();
+  ctx.fillStyle=grad; roundRect(ctx,cx-ex/2,cy-ey/2,ex,ey,10); ctx.fill();
   ctx.restore();
 
-  // recorte interior del marco
+  // recorte interior
   const cxw=contentW*scale, cyh=contentH*scale;
   ctx.save(); ctx.globalCompositeOperation='destination-out';
-  roundRect(ctx,cx-cxw/2,cy-cyh/2,cxw,cyh,6); ctx.fill(); ctx.restore();
+  roundRect(ctx,cx-cxw/2,cy-cyh/2,cxw,cyh,8); ctx.fill(); ctx.restore();
 
   // contorno adaptativo del marco
-  ctx.save(); ctx.lineWidth=2; ctx.strokeStyle=contrastStroke(frameColor);
-  roundRect(ctx,cx-ex/2,cy-ey/2,ex,ey,8); ctx.stroke();
+  ctx.save();
+  ctx.lineWidth=2; ctx.strokeStyle=contrastStroke(frameColor);
+  roundRect(ctx,cx-ex/2,cy-ey/2,ex,ey,10); ctx.stroke();
   ctx.restore();
 
-  // marialuisa
+  // MARIALUISA
   if(mat>0){
     const paper = (document.getElementById('matPreset').value && PAPERS.find(p=>p.id===document.getElementById('matPreset').value)) || null;
     const style = paper ? paper.style : 'smooth';
     const tex = makeTextureCanvas(matColor, style, Math.ceil(cxw), Math.ceil(cyh));
     const pat = ctx.createPattern(tex,'repeat');
-    ctx.fillStyle=pat; roundRect(ctx,cx-cxw/2,cy-cyh/2,cxw,cyh,6); ctx.fill();
+    ctx.fillStyle=pat; roundRect(ctx,cx-cxw/2,cy-cyh/2,cxw,cyh,8); ctx.fill();
 
-    // línea marco ↔︎ marialuisa
     ctx.save(); ctx.lineWidth=1.2; ctx.strokeStyle='rgba(0,0,0,.14)';
-    roundRect(ctx,cx-cxw/2,cy-cyh/2,cxw,cyh,6); ctx.stroke(); ctx.restore();
+    roundRect(ctx,cx-cxw/2,cy-cyh/2,cxw,cyh,8); ctx.stroke(); ctx.restore();
 
-    // recorte interior hacia la obra
     const aw=artW*scale, ah=artH*scale; ctx.save(); ctx.globalCompositeOperation='destination-out';
-    roundRect(ctx,cx-aw/2,cy-ah/2,aw,ah,4); ctx.fill(); ctx.restore();
+    roundRect(ctx,cx-aw/2,cy-ah/2,aw,ah,6); ctx.fill(); ctx.restore();
 
-    // línea marialuisa ↔︎ obra
     ctx.save(); ctx.lineWidth=1; ctx.strokeStyle='rgba(0,0,0,.18)';
-    roundRect(ctx,cx-(artW*scale)/2,cy-(artH*scale)/2,artW*scale,artH*scale,4); ctx.stroke(); ctx.restore();
+    roundRect(ctx,cx-(artW*scale)/2,cy-(artH*scale)/2,artW*scale,artH*scale,6); ctx.stroke(); ctx.restore();
   } else {
-    // borde de la obra si no hay ML
     ctx.save(); ctx.lineWidth=1; ctx.strokeStyle='rgba(0,0,0,.18)';
-    roundRect(ctx,cx-(artW*scale)/2,cy-(artH*scale)/2,artW*scale,artH*scale,4); ctx.stroke(); ctx.restore();
+    roundRect(ctx,cx-(artW*scale)/2,cy-(artH*scale)/2,artW*scale,artH*scale,6); ctx.stroke(); ctx.restore();
   }
 
-  // obra
+  // OBRA
   if(imgLoaded){
-    const aw=artW*scale, ah=artH*scale; ctx.save(); roundRect(ctx,cx-aw/2,cy-ah/2,aw,ah,4); ctx.clip();
+    const aw=artW*scale, ah=artH*scale; ctx.save(); roundRect(ctx,cx-aw/2,cy-ah/2,aw,ah,6); ctx.clip();
     const ir=artImg.naturalWidth/artImg.naturalHeight, ar=aw/ah; let dw,dh;
     if(ir>ar){dh=ah; dw=dh*ir;} else {dw=aw; dh=dw/ir;}
     ctx.drawImage(artImg, cx-dw/2, cy-dh/2, dw, dh); ctx.restore();
@@ -408,13 +446,9 @@ document.getElementById('wa').addEventListener('click',()=>{
   const contentW=aWcm+2*mat, contentH=aHcm+2*mat;
   const extW=contentW+2*frame, extH=contentH+2*frame;
 
-  // vidrio: SOLO indicamos tipo (sin precio para el cliente)
   const glass=document.getElementById('glass').value;
-  let glassText='No';
-  if(glass==='2mm'){ glassText='2 mm'; }
-  if(glass==='3mm'){ glassText='3 mm'; }
+  let glassText='No'; if(glass==='2mm'){ glassText='2 mm'; } if(glass==='3mm'){ glassText='3 mm'; }
 
-  // info de moldura para que cotices rápido
   const moldSelEl = document.getElementById('moldSel');
   const moldId = moldSelEl.value || '';
   const moldItem = moldId ? MOLDURAS.find(x=>x.id===moldId) : null;
