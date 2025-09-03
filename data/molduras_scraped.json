@@ -1,0 +1,210 @@
+[
+  {
+    "id": "VLS-01",
+    "name": "Versalles 01",
+    "width_cm": null,
+    "color": "#555555",
+    "style": "ornate",
+    "img": "img/molduras/VLS-01.jpg"
+  },
+  {
+    "id": "VLS-02",
+    "name": "Versalles 02",
+    "width_cm": null,
+    "color": "#555555",
+    "style": "ornate",
+    "img": "img/molduras/VLS-02.jpg"
+  },
+  {
+    "id": "VLS-03",
+    "name": "Versalles 03",
+    "width_cm": null,
+    "color": "#555555",
+    "style": "ornate",
+    "img": "img/molduras/VLS-03.jpg"
+  },
+  {
+    "id": "VLS-05",
+    "name": "Versalles 05",
+    "width_cm": null,
+    "color": "#555555",
+    "style": "ornate",
+    "img": "img/molduras/VLS-05.jpg"
+  },
+  {
+    "id": "VLS-06",
+    "name": "Versalles 06",
+    "width_cm": null,
+    "color": "#555555",
+    "style": "ornate",
+    "img": "img/molduras/VLS-06.jpg"
+  },
+  {
+    "id": "VLS-07",
+    "name": "Versalles 07",
+    "width_cm": null,
+    "color": "#555555",
+    "style": "ornate",
+    "img": "img/molduras/VLS-07.jpg"
+  },
+  {
+    "id": "VLS-08",
+    "name": "Versalles 08",
+    "width_cm": null,
+    "color": "#555555",
+    "style": "ornate",
+    "img": "img/molduras/VLS-08.jpg"
+  },
+  {
+    "id": "VLS-10",
+    "name": "Versalles 10",
+    "width_cm": null,
+    "color": "#555555",
+    "style": "ornate",
+    "img": "img/molduras/VLS-10.jpg"
+  },
+  {
+    "id": "VLS-11",
+    "name": "Versalles 11",
+    "width_cm": null,
+    "color": "#555555",
+    "style": "ornate",
+    "img": "img/molduras/VLS-11.jpg"
+  },
+  {
+    "id": "VLS-12",
+    "name": "Versalles 12",
+    "width_cm": null,
+    "color": "#555555",
+    "style": "ornate",
+    "img": "img/molduras/VLS-12.jpg"
+  },
+  {
+    "id": "ATE-01",
+    "name": "Atenas 01",
+    "width_cm": null,
+    "color": "#555555",
+    "style": "ornate",
+    "img": "img/molduras/ATE-01.jpg"
+  },
+  {
+    "id": "ATE-02",
+    "name": "Atenas 02",
+    "width_cm": null,
+    "color": "#555555",
+    "style": "ornate",
+    "img": "img/molduras/ATE-02.jpg"
+  },
+  {
+    "id": "ATE-03",
+    "name": "Atenas 03",
+    "width_cm": null,
+    "color": "#555555",
+    "style": "ornate",
+    "img": "img/molduras/ATE-03.jpg"
+  },
+  {
+    "id": "ATE-04",
+    "name": "Atenas 04",
+    "width_cm": null,
+    "color": "#555555",
+    "style": "ornate",
+    "img": "img/molduras/ATE-04.jpg"
+  },
+  {
+    "id": "ATE-05",
+    "name": "Atenas 05",
+    "width_cm": null,
+    "color": "#555555",
+    "style": "ornate",
+    "img": "img/molduras/ATE-05.jpg"
+  },
+  {
+    "id": "ATE-06",
+    "name": "Atenas 06",
+    "width_cm": null,
+    "color": "#555555",
+    "style": "ornate",
+    "img": "img/molduras/ATE-06.jpg"
+  },
+  {
+    "id": "ATE-07",
+    "name": "Atenas 07",
+    "width_cm": null,
+    "color": "#555555",
+    "style": "ornate",
+    "img": "img/molduras/ATE-07.jpg"
+  },
+  {
+    "id": "ATE-08",
+    "name": "Atenas 08",
+    "width_cm": null,
+    "color": "#555555",
+    "style": "ornate",
+    "img": "img/molduras/ATE-08.jpg"
+  },
+  {
+    "id": "ATE-09",
+    "name": "Atenas 09",
+    "width_cm": null,
+    "color": "#555555",
+    "style": "ornate",
+    "img": "img/molduras/ATE-09.jpg"
+  },
+  {
+    "id": "ATE-10",
+    "name": "Atenas 10",
+    "width_cm": null,
+    "color": "#555555",
+    "style": "ornate",
+    "img": "img/molduras/ATE-10.jpg"
+  },
+  {
+    "id": "ATE-11",
+    "name": "Atenas 11",
+    "width_cm": null,
+    "color": "#555555",
+    "style": "ornate",
+    "img": "img/molduras/ATE-11.jpg"
+  },
+  {
+    "id": "ATE-12",
+    "name": "Atenas 12",
+    "width_cm": null,
+    "color": "#555555",
+    "style": "ornate",
+    "img": "img/molduras/ATE-12.jpg"
+  },
+  {
+    "id": "ATE-14",
+    "name": "Atenas 14",
+    "width_cm": null,
+    "color": "#555555",
+    "style": "ornate",
+    "img": "img/molduras/ATE-14.jpg"
+  },
+  {
+    "id": "ATE-16",
+    "name": "Atenas 16",
+    "width_cm": null,
+    "color": "#555555",
+    "style": "ornate",
+    "img": "img/molduras/ATE-16.jpg"
+  },
+  {
+    "id": "ATE-17",
+    "name": "Atenas 17",
+    "width_cm": null,
+    "color": "#555555",
+    "style": "ornate",
+    "img": "img/molduras/ATE-17.jpg"
+  },
+  {
+    "id": "ATE-20",
+    "name": "Atenas 20",
+    "width_cm": null,
+    "color": "#555555",
+    "style": "ornate",
+    "img": "img/molduras/ATE-20.jpg"
+  }
+]
