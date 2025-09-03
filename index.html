@@ -1,65 +1,43 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8" />
-<meta http-equiv="Cache-Control" content="no-store, must-revalidate" />
-<meta http-equiv="Pragma" content="no-cache" />
-<meta http-equiv="Expires" content="0" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Cotizador · Marcos Vallarta</title>
-<meta name="color-scheme" content="light" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cotizador Marcos Vallarta · Live</title>
 <style>
-:root{
-  --brand:#20b6c1; --ink:#142022; --bg:#f6fafb; --card:#fff; --border:#dfe6ea;
-}
+:root{--brand:#41b8c4;--ink:#142022;--bg:#f7f9fa;--card:#fff;--border:#dfe6ea}
 *{box-sizing:border-box}
-html,body{margin:0;font-family:system-ui,Segoe UI,Inter,Roboto,Arial;color:var(--ink);background:var(--bg)}
-header{display:flex;gap:12px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border);background:#fff}
-header .brand{display:flex;align-items:center;gap:10px}
-header .brand img{height:38px;width:auto;display:none}
-header .brand .fallback{font-weight:800;letter-spacing:.2px}
-header .tag{color:#4d666c}
-main{display:grid;grid-template-columns:370px 1fr;gap:16px;padding:16px;min-height:calc(100dvh - 62px)}
-@media (max-width:1000px){main{grid-template-columns:1fr}}
-.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;box-shadow:0 6px 20px rgba(0,0,0,.05)}
-h3{margin:6px 0 8px}
-label{font-size:12px;color:#5d7378;margin-bottom:6px;display:block}
-input[type="number"], input[type="text"], select {width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:10px;background:#fff}
+body{margin:0;font-family:system-ui,Segoe UI,Roboto,Inter,Arial;background:var(--bg);color:var(--ink)}
+header{display:flex;gap:10px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border);background:#fff}
+main{display:grid;grid-template-columns:360px 1fr;gap:16px;padding:16px;min-height:calc(100dvh - 60px)}
+@media(max-width:980px){main{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;box-shadow:0 4px 18px rgba(0,0,0,.05)}
+label{font-size:12px;color:#5d7378;display:block;margin-bottom:6px}
+input[type="number"],select,input[type="text"]{width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:10px;background:#fff}
 input[type="file"]{width:100%}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.btn{appearance:none;border:0;border-radius:10px;background:var(--brand);color:#07373b;font-weight:800;padding:10px 12px;cursor:pointer}
-.ghost{background:#eef6f7;border:1px solid var(--border);color:#0e2023}
-small{color:#6a878d}
-#stage{background:#e9f2f4;border:1px solid var(--border);border-radius:16px;position:relative;aspect-ratio:16/10;display:grid;place-items:center}
+.btn{appearance:none;border:0;border-radius:10px;background:var(--brand);color:#042629;padding:10px 12px;font-weight:700;cursor:pointer}
+.ghost{background:#eef5f6;color:#0d1e20;border:1px solid var(--border)}
+small{color:#5d7378}
+#stage{background:#eaf1f3;border:1px solid var(--border);border-radius:16px;position:relative;aspect-ratio:16/10;display:grid;place-items:center}
 canvas{max-width:100%;width:100%;height:auto;border-radius:16px}
 .kpi{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
-.kpi>div{background:#f2f8f9;border:1px solid var(--border);border-radius:10px;padding:8px;text-align:center}
+.kpi>div{background:#f2f7f8;border:1px solid var(--border);border-radius:10px;padding:8px;text-align:center}
 .badge{display:inline-block;background:#e9f6f8;border:1px solid var(--border);padding:2px 8px;border-radius:999px;color:#0d3136;font-size:12px}
-.flex{display:flex;align-items:center;gap:8px}
-input::file-selector-button{border:0;background:#eef6f7;padding:8px;border-radius:8px;margin-right:8px}
-.help{font-size:12px;color:#647b80}
-.search{display:flex;gap:6px;align-items:center}
-.search input{flex:1}
-#logoBadge{position:absolute;right:10px;bottom:10px;background:rgba(255,255,255,.9);border:1px solid var(--border);border-radius:10px;padding:6px 10px;display:flex;gap:8px;align-items:center}
-#logoBadge img{height:20px;width:auto;display:none}
 
-/* Por si existía alguna capa antigua de watermark en el DOM */
-.watermark, #watermark, [data-watermark]{display:none!important;opacity:0!important;pointer-events:none!important}
+/* si existiera alguna capa/estilo de watermark residual en el DOM */
+.watermark,#watermark,[data-watermark]{display:none!important;opacity:0!important;pointer-events:none!important}
 </style>
 </head>
 <body>
 <header>
-  <div class="brand">
-    <img id="brandLogo" alt="Marcos Vallarta" src="img/logo.png" onload="this.style.display='block'">
-    <div class="fallback">Marcos Vallarta</div>
-  </div>
-  <div class="tag">Marcos a la medida · T. +52 33 2923 1790</div>
+  <strong>Marcos Vallarta</strong><span style="color:#5d7378">· Cotizador (Live)</span>
 </header>
 
 <main>
   <section class="card">
-    <div class="flex" style="justify-content:space-between">
-      <h3>1) Sube la foto de tu obra</h3>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h3 style="margin:6px 0">1) Sube la foto de tu obra</h3>
       <span class="badge">beta</span>
     </div>
     <input id="file" type="file" accept="image/*">
@@ -108,55 +86,25 @@ input::file-selector-button{border:0;background:#eef6f7;padding:8px;border-radiu
         </select>
       </div>
     </div>
-
-    <div class="search" style="margin-top:6px">
-      <label style="margin:0;white-space:nowrap">Buscar moldura</label>
-      <input id="moldSearch" type="text" placeholder="Escribe clave o nombre (p. ej. VERSALLES-10, nogal, dorado)…">
-    </div>
-
     <div class="row" style="margin-top:6px">
       <div><label>Moldura del catálogo</label><select id="moldSel"></select></div>
-      <div><label>Miniatura</label><canvas id="moldThumb" width="140" height="44" style="border:1px solid var(--border);border-radius:8px"></canvas></div>
+      <div><label>Miniatura</label><canvas id="moldThumb" width="120" height="40" style="border:1px solid var(--border);border-radius:8px"></canvas></div>
     </div>
     <small id="catalogInfo"></small>
-
-    <hr><h3>3.1) Vidrio</h3>
-    <div class="row">
-      <div>
-        <label>¿Lleva vidrio?</label>
-        <select id="glass">
-          <option value="none" selected>Sin vidrio</option>
-          <option value="2mm">Vidrio 2 mm</option>
-          <option value="3mm">Vidrio 3 mm</option>
-        </select>
-      </div>
-      <div>
-        <label>Nota</label>
-        <input type="text" value="Se calcula internamente (no se muestra al cliente)" disabled>
-      </div>
-    </div>
 
     <hr><h3>4) WhatsApp</h3>
     <div><label>Tu nombre (requerido)</label><input id="name" type="text" placeholder="Tu nombre" required></div>
     <button class="btn" id="wa">Enviar solicitud por WhatsApp</button>
     <small>Se abrirá WhatsApp con el mensaje. Precio aproximado sujeto a tipo de cambio y mercado.</small>
 
-    <hr>
-    <div class="row">
+    <hr><div class="row">
       <button class="btn ghost" id="save">Descargar imagen simulada (PNG)</button>
       <button class="btn ghost" id="reset">Reiniciar</button>
     </div>
   </section>
 
-  <section class="card" style="position:relative">
-    <div id="stage">
-      <canvas id="cv" width="1200" height="750" aria-label="Simulador"></canvas>
-      <div id="logoBadge">
-        <img id="badgeLogo" src="img/logo.png" alt="MV" onload="this.style.display='block'">
-        <span style="font-weight:700">Marcos Vallarta</span>
-        <span class="help">• +52 33 2923 1790</span>
-      </div>
-    </div>
+  <section class="card">
+    <div id="stage"><canvas id="cv" width="1200" height="750" aria-label="Simulador"></canvas></div>
     <div class="kpi">
       <div><div>Exterior (cm)</div><strong id="ext"></strong></div>
       <div><div>Área visible (cm)</div><strong id="vis"></strong></div>
@@ -165,216 +113,104 @@ input::file-selector-button{border:0;background:#eef6f7;padding:8px;border-radiu
 </main>
 
 <script>
-/* ====================== Config ====================== */
+// ===== Config =====
 const BUSINESS_WA = '523329231790';
 
-/* ====================== Util ======================== */
+// ===== Util =====
 const cv = document.getElementById('cv'); const ctx = cv.getContext('2d');
 const artImg = new Image(); let imgLoaded = false;
-
-const validHex = h => /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(h||'');
-function shade(hex,pct){
-  if(!validHex(hex)) hex='#555555';
-  const c=hex.replace('#','');const num=parseInt(c.length===3?c.split('').map(x=>x+x).join(''):c,16);
-  let r=(num>>16)&255,g=(num>>8)&255,b=num&255;
-  r=Math.min(255,Math.max(0,Math.round(r+(pct/100)*255)));
-  g=Math.min(255,Math.max(0,Math.round(g+(pct/100)*255)));
-  b=Math.min(255,Math.max(0,Math.round(b+(pct/100)*255)));
-  return '#'+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1);
-}
+function shade(hex,pct){const c=hex.replace('#','');const num=parseInt(c.length===3?c.split('').map(x=>x+x).join(''):c,16);let r=(num>>16)&255,g=(num>>8)&255,b=num&255;r=Math.min(255,Math.max(0,Math.round(r+(pct/100)*255)));g=Math.min(255,Math.max(0,Math.round(g+(pct/100)*255)));b=Math.min(255,Math.max(0,Math.round(b+(pct/100)*255)));return '#'+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1);}
 function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();}
-function luma(hex){ if(!validHex(hex)) return 128; const c=hex.replace('#',''); const n=parseInt(c.length===3?c.split('').map(x=>x+x).join(''):c,16); const r=(n>>16)&255,g=(n>>8)&255,b=n&255; return 0.2126*r+0.7152*g+0.0722*b; }
-const contrastStroke = hex => (luma(hex)>200 ? 'rgba(0,0,0,.28)' : 'rgba(255,255,255,.35)');
-
 function makeTextureCanvas(color, style='smooth', w=80, h=80){
   const c=document.createElement('canvas'); c.width=w; c.height=h; const g=c.getContext('2d');
-  g.fillStyle=validHex(color)?color:'#dddddd'; g.fillRect(0,0,w,h);
-  if(style==='linen'){
-    g.strokeStyle='rgba(0,0,0,.08)'; for(let i=0;i<w;i+=6){g.beginPath();g.moveTo(i,0);g.lineTo(i,h);g.stroke();}
-    g.strokeStyle='rgba(255,255,255,.07)'; for(let j=0;j<h;j+=6){g.beginPath();g.moveTo(0,j);g.lineTo(w,j);g.stroke();}
-  }
-  if(style==='speckle'){
-    g.fillStyle='rgba(0,0,0,.12)'; for(let k=0;k<420;k++){g.fillRect(Math.random()*w,Math.random()*h,1,1);}
-  }
-  if(style==='fiber'){
-    g.strokeStyle='rgba(0,0,0,.12)'; for(let k=0;k<28;k++){const x1=Math.random()*w,y1=Math.random()*h,x2=x1+Math.random()*20,y2=y1+Math.random()*6; g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();}
-  }
-  if(style==='metal'){
-    for(let y=0;y<h;y++){const s=200+25*Math.sin(y/6); g.fillStyle=`rgb(${s|0},${s|0},${s|0})`; g.fillRect(0,y,w,1);}
-  }
-  if(style==='grain'){
-    g.fillStyle='rgba(255,255,255,.05)'; for(let y=0;y<h;y+=2){g.fillRect(0,y,w,1);}
-    g.fillStyle='rgba(0,0,0,.04)'; for(let x=0;x<w;x+=6){g.fillRect(x,0,1,h);}
-  }
-  if(style==='ornate'){
-    g.globalAlpha=0.92; for(let y=0;y<h;y++){const s=10+5*Math.sin(y/8); g.fillStyle=`rgba(0,0,0,${(s/255)*.10})`; g.fillRect(0,y,w,1);} g.globalAlpha=1;
-    g.strokeStyle='rgba(0,0,0,.18)'; g.lineWidth=0.8;
-    for(let y=6;y<h;y+=12){for(let x=6;x<w;x+=16){g.beginPath();g.arc(x,y,3,0,Math.PI*1.5,false);g.stroke();g.beginPath();g.moveTo(x+3,y+3);g.quadraticCurveTo(x+7,y+1,x+10,y+5);g.stroke();}}
-    g.fillStyle='rgba(255,255,255,.22)'; for(let i=0;i<Math.ceil(w*h/120);i++){g.fillRect(Math.random()*w,Math.random()*h,1,1);}
-  }
+  g.fillStyle=color; g.fillRect(0,0,w,h);
+  if(style==='linen'){g.strokeStyle='rgba(0,0,0,.08)'; for(let i=0;i<w;i+=6){g.beginPath();g.moveTo(i,0);g.lineTo(i,h);g.stroke();}
+                      g.strokeStyle='rgba(255,255,255,.07)'; for(let j=0;j<h;j+=6){g.beginPath();g.moveTo(0,j);g.lineTo(w,j);g.stroke();}}
+  if(style==='speckle'){g.fillStyle='rgba(0,0,0,.12)'; for(let k=0;k<420;k++){const x=Math.random()*w,y=Math.random()*h; g.fillRect(x,y,1,1);}}
+  if(style==='fiber'){g.strokeStyle='rgba(0,0,0,.12)'; for(let k=0;k<28;k++){const x1=Math.random()*w,y1=Math.random()*h,x2=x1+Math.random()*20,y2=y1+Math.random()*6; g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();}}
+  if(style==='metal'){for(let y=0;y<h;y++){const s=200+25*Math.sin(y/6); g.fillStyle=`rgb(${s|0},${s|0},${s|0})`; g.fillRect(0,y,w,1);} }
+  if(style==='grain'){g.fillStyle='rgba(255,255,255,.05)'; for(let y=0;y<h;y+=2){g.fillRect(0,y,w,1);} g.fillStyle='rgba(0,0,0,.04)'; for(let x=0;x<w;x+=6){g.fillRect(x,0,1,h);} }
   return c;
 }
 
-/* ====== Catálogos embebidos (ampliado) ====== */
+// ===== Catálogos LITE embebidos =====
 const LITE_PAPERS = [
   {id:"B402",name:"B402 Polar White (Black Core)",color:"#f5f5f5",style:"smooth"},
   {id:"B222",name:"B222 Smooth White",color:"#f7f8f7",style:"smooth"},
   {id:"B8-508",name:"B8-508 Ecru",color:"#eae0c8",style:"fiber"},
   {id:"B504",name:"B504 Buff",color:"#b5895a",style:"speckle"},
   {id:"B545",name:"B545 Deep Blue",color:"#1f3a5a",style:"smooth"},
+  {id:"B703",name:"B703 Marzipan",color:"#e0d6b8",style:"smooth"},
   {id:"B528",name:"B528 Jade",color:"#5e7f6b",style:"smooth"},
   {id:"B548",name:"B548 Pansy",color:"#6a4b8a",style:"smooth"},
-  {id:"B703",name:"B703 Marzipan",color:"#e0d6b8",style:"smooth"},
   {id:"B79", name:"B79 Yorktown Blue",color:"#6289b7",style:"smooth"},
   {id:"B403",name:"B403 Pure White",color:"#ffffff",style:"smooth"}
 ];
 
-// Molduras de muestra (TRA + Versalles + Atenas). El scraper y/o data/*.json las amplían.
 const LITE_MOLDS = [
-  {id:"TRA-01",name:"Negro",width_cm:2.0,color:"#111111",style:"grain"},
-  {id:"TRA-02",name:"Nogal",width_cm:2.0,color:"#6b3f21",style:"grain"},
-  {id:"TRA-03",name:"Caoba",width_cm:2.0,color:"#7a3b1f",style:"grain"},
-  {id:"TRA-04",name:"Chocolate",width_cm:2.0,color:"#4b2b1a",style:"grain"},
-  {id:"TRA-05",name:"Nogal",width_cm:2.3,color:"#6b3f21",style:"grain"},
-  {id:"TRA-06",name:"Caoba",width_cm:2.3,color:"#7a3b1f",style:"grain"},
-  {id:"TRA-07",name:"Chocolate",width_cm:2.3,color:"#4b2b1a",style:"grain"},
-  {id:"TRA-08",name:"Nogal",width_cm:3.9,color:"#6b3f21",style:"grain"},
-  {id:"TRA-09",name:"Caoba",width_cm:3.9,color:"#7a3b1f",style:"grain"},
-  // Versalles
-  {id:"VERSALLES-01",name:"Blanco grabado oro",width_cm:6.5,color:"#eae7df",style:"ornate"},
-  {id:"VERSALLES-02",name:"Plateado grabado",width_cm:6.5,color:"#c0c0c0",style:"ornate"},
-  {id:"VERSALLES-03",name:"Dorado grabado",width_cm:6.5,color:"#c7a446",style:"ornate"},
-  {id:"VERSALLES-07",name:"Chocolate con oro",width_cm:6.5,color:"#4b2b1a",style:"ornate"},
-  {id:"VERSALLES-10",name:"Negro con plata",width_cm:6.5,color:"#111111",style:"ornate"},
-  {id:"VERSALLES-11",name:"Negro con oro",width_cm:6.5,color:"#111111",style:"ornate"},
-  // Atenas
-  {id:"ATENAS-01",name:"Grabado clásico dorado",width_cm:5.5,color:"#c7a446",style:"ornate"},
-  {id:"ATENAS-06",name:"Atenas 06",width_cm:3.0,color:"#c7a446",style:"ornate"},
-  {id:"ATENAS-09",name:"Grabado marfil",width_cm:5.5,color:"#efe9da",style:"ornate"},
-  {id:"ATENAS-10",name:"Grabado plata",width_cm:5.5,color:"#c0c0c0",style:"ornate"},
-  {id:"ATENAS-20",name:"Grabado bronce",width_cm:5.5,color:"#8c6b3f",style:"ornate"}
+  {id:"NEG-30",name:"Negro · 3 cm",width_cm:3,color:"#111111",style:"grain"},
+  {id:"NEG-40",name:"Negro · 4 cm",width_cm:4,color:"#111111",style:"grain"},
+  {id:"BLA-30",name:"Blanco · 3 cm",width_cm:3,color:"#f5f5f5",style:"grain"},
+  {id:"NOG-35",name:"Nogal · 3.5 cm",width_cm:3.5,color:"#6b3f21",style:"grain"},
+  {id:"DOR-30",name:"Dorado · 3 cm",width_cm:3,color:"#c7a446",style:"metal"},
+  {id:"PLA-30",name:"Plata · 3 cm",width_cm:3,color:"#c0c0c0",style:"metal"},
+  {id:"GRI-25",name:"Gris · 2.5 cm",width_cm:2.5,color:"#777777",style:"grain"},
+  {id:"WNG-30",name:"Wengué · 3 cm",width_cm:3,color:"#3a2a1a",style:"grain"},
+  {id:"ROBL-30",name:"Roble · 3 cm",width_cm:3,color:"#916c44",style:"grain"},
+  {id:"ANT-35",name:"Antique Gold · 3.5 cm",width_cm:3.5,color:"#b99652",style:"metal"},
 ];
 
-/* ====== Carga catálogos externos (/data) ====== */
+// ===== Carga catálogos externos (si existen en /data/) =====
 const BASE = location.pathname.replace(/[^/]+$/, '');
 let PAPERS = [...LITE_PAPERS], MOLDURAS = [...LITE_MOLDS];
 
-const normalizeId = id => (id||'').toString().toUpperCase().replace(/[^A-Z0-9]/g,'');
-function mergeAndDedupeNormalized(baseArr, ...others){
-  const map = new Map();
-  const take = (m) => {
-    if(!m || !m.id) return;
-    const key = normalizeId(m.id);
-    const prev = map.get(key) || {};
-    const merged = {...prev, ...m};
-    if(!merged.id) merged.id = m.id;
-    map.set(key, merged);
-  };
-  [...baseArr, ...others.flat()].forEach(take);
-  return [...map.values()].sort((a,b)=> (a.id||'').localeCompare(b.id||''));
-}
-
 Promise.all([
   fetch(BASE+'data/cartulinas.json').then(r=>r.ok?r.json():null).catch(()=>null),
-  fetch(BASE+'data/molduras_scraped.json').then(r=>r.ok?r.json():null).catch(()=>null),
   fetch(BASE+'data/molduras.json').then(r=>r.ok?r.json():null).catch(()=>null),
-]).then(([pp,mmScraped,mmManual])=>{
+]).then(([pp,mm])=>{
   const info = document.getElementById('catalogInfo');
   if(pp && Array.isArray(pp) && pp.length){ PAPERS = pp; }
-  if(mmScraped && Array.isArray(mmScraped) && mmScraped.length){
-    MOLDURAS = mergeAndDedupeNormalized(LITE_MOLDS, mmScraped);
-  } else if(mmManual && Array.isArray(mmManual) && mmManual.length){
-    MOLDURAS = mergeAndDedupeNormalized(LITE_MOLDS, mmManual);
-  } else {
-    MOLDURAS = mergeAndDedupeNormalized(LITE_MOLDS);
-  }
-  info.textContent = `Catálogo activo: Cartulinas ${PAPERS.length} · Molduras ${MOLDURAS.length}` + ((pp||mmScraped||mmManual)?' (desde /data)':' (embebido)');
+  if(mm && Array.isArray(mm) && mm.length){ MOLDURAS = mm; }
+  info.textContent = `Catálogo activo: Cartulinas ${PAPERS.length} · Molduras ${MOLDURAS.length}` + ((pp||mm)?' (desde /data)':' (embebido)');
   populate();
 }).catch(()=>populate());
 
-/* ====================== Estado de moldura seleccionada ====================== */
-let selectedMold = null;
-let selectedMoldImg = null;
-
-/* ====================== Helpers ===================== */
-function setDynamicOption(selectId, value, label, attrName){
-  const sel=document.getElementById(selectId);
-  let opt=sel.querySelector(`option[${attrName}]`);
-  if(!opt){ opt=document.createElement('option'); opt.setAttribute(attrName,'1'); opt.textContent=label; sel.prepend(opt); }
-  opt.value=value; sel.value=value;
-}
-function applyCatalogColor(hex){
-  setDynamicOption('frameColor', validHex(hex)?hex:'#111111', 'Del catálogo', 'data-catalog');
-}
-function sameOrigin(src){
-  try{ return new URL(src, location.href).origin === location.origin; }catch(e){ return false; }
-}
-
-/* ====================== UI ========================= */
+// ===== UI =====
 function populate(){
-  // ML
+  // presets de marialuisa
   const matPreset = document.getElementById('matPreset');
   matPreset.innerHTML = '<option value="">— Elegir —</option>' + PAPERS.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
   matPreset.onchange = ()=>{
     const it = PAPERS.find(x=>x.id===matPreset.value);
     if(!it) return;
-    setDynamicOption('matColor', it.color, 'Del catálogo', 'data-mat');
+    document.getElementById('matColor').value = it.color;
     draw();
   };
 
-  // Molduras
-  rebuildMoldSelect(MOLDURAS);
-
-  // Buscador
-  document.getElementById('moldSearch').addEventListener('input', (e)=>{
-    const q=e.target.value.trim().toLowerCase();
-    if(!q){ rebuildMoldSelect(MOLDURAS); return; }
-    const filtered = MOLDURAS.filter(m=>{
-      return (m.id||'').toLowerCase().includes(q) || (m.name||'').toLowerCase().includes(q);
-    });
-    rebuildMoldSelect(filtered);
-  });
-}
-
-function rebuildMoldSelect(list){
+  // molduras
   const moldSel = document.getElementById('moldSel');
-  const cur = moldSel.value;
-  moldSel.innerHTML = '<option value="">— Elegir —</option>' +
-    list.map(m => `<option value="${m.id}">${m.id} · ${m.name}${m.width_cm?` · ${m.width_cm} cm`:''}</option>`).join('');
-  if(cur && list.some(x=>x.id===cur)) moldSel.value = cur;
-
+  moldSel.innerHTML = '<option value="">— Elegir —</option>' + MOLDURAS.map(m=>`<option value="${m.id}">${m.name}</option>`).join('');
   moldSel.onchange = ()=>{
-    const m = (list.find(x=>x.id===moldSel.value) || MOLDURAS.find(x=>x.id===moldSel.value));
+    const m = MOLDURAS.find(x=>x.id===moldSel.value);
     const t = document.getElementById('moldThumb'), g=t.getContext('2d');
     g.clearRect(0,0,t.width,t.height);
 
-    selectedMold = m; selectedMoldImg = null;
-
     if(m){
-      document.getElementById('frame').value = m.width_cm || 3;
-      applyCatalogColor(m.color || '#111111');
-
-      // Si la imagen proviene de otro dominio, evitamos CORS y usamos textura sintética
-      if (m.img && sameOrigin(m.img)){
-        const pic = new Image();
-        pic.crossOrigin = "anonymous";
-        pic.onload = ()=>{ g.drawImage(pic,0,0,t.width,t.height); selectedMoldImg = pic; draw(); };
-        pic.onerror = ()=>{ const tx = makeTextureCanvas(m.color, m.style||'grain', t.width, t.height); g.drawImage(tx,0,0); draw(); };
-        pic.src = m.img;
-      } else {
-        const tx = makeTextureCanvas(m.color, m.style||'grain', t.width, t.height);
-        g.drawImage(tx,0,0);
-      }
+      document.getElementById('frame').value = m.width_cm ?? 3;
+      document.getElementById('frameColor').value = m.color ?? '#111111';
+      const tex = makeTextureCanvas(m.color ?? '#111111', m.style ?? 'grain', t.width, t.height);
+      g.drawImage(tex,0,0);
     }
     draw();
   };
 }
 
-/* ===================== Carga de imagen ====================== */
-['w','h','mat','frame','matOn','matColor','frameColor','glass'].forEach(id=>{
+// cambios que redibujan
+['w','h','mat','frame','matOn','matColor','frameColor'].forEach(id=>{
   document.getElementById(id).addEventListener('input',draw);
 });
 
+// carga de imagen con escalado si es enorme
 document.getElementById('file').addEventListener('change',e=>{
   const f=e.target.files&&e.target.files[0]; if(!f) return;
   const url=URL.createObjectURL(f);
@@ -393,42 +229,7 @@ document.getElementById('file').addEventListener('change',e=>{
   tmp.src=url;
 });
 
-/* =================== Marco realista con textura =================== */
-function drawTexturedFrame(x, y, w, h, b, img, strokeColor){
-  const side = Math.max(1, Math.floor(b));
-  // TOP/BOTTOM
-  const sliceH = Math.max(8, Math.floor((img.height||200)*0.25));
-  const sy = Math.max(0, Math.floor(((img.height||200) - sliceH)/2));
-  const tTop = document.createElement('canvas');
-  tTop.width = Math.max(64, img.width||256); tTop.height = side;
-  tTop.getContext('2d').drawImage(img, 0, sy, img.width||256, sliceH, 0, 0, tTop.width, side);
-  ctx.fillStyle = ctx.createPattern(tTop, 'repeat');
-  ctx.fillRect(x, y, w, side); // top
-  ctx.fillRect(x, y+h-side, w, side); // bottom
-
-  // LEFT/RIGHT
-  const sliceW = Math.max(8, Math.floor((img.width||200)*0.25));
-  const sx = Math.max(0, Math.floor(((img.width||200) - sliceW)/2));
-  const tLeft = document.createElement('canvas');
-  tLeft.width = side; tLeft.height = Math.max(64, img.height||256);
-  tLeft.getContext('2d').drawImage(img, sx, 0, sliceW, img.height||256, 0, 0, side, tLeft.height);
-  ctx.fillStyle = ctx.createPattern(tLeft, 'repeat');
-  ctx.fillRect(x, y+side, side, h-2*side); // left
-  ctx.fillRect(x+w-side, y+side, side, h-2*side); // right
-
-  // Hueco interior
-  ctx.save(); ctx.globalCompositeOperation='destination-out';
-  ctx.fillRect(x+side, y+side, w-2*side, h-2*side);
-  ctx.restore();
-
-  // Bordes finos
-  ctx.save(); ctx.strokeStyle = strokeColor || 'rgba(0,0,0,.25)'; ctx.lineWidth=1.2;
-  ctx.strokeRect(x+0.5, y+0.5, w-1, h-1);
-  ctx.strokeRect(x+side+0.5, y+side+0.5, w-2*side-1, h-2*side-1);
-  ctx.restore();
-}
-
-/* ===================== RENDER ====================== */
+// ===== Render =====
 function draw(){
   const W=cv.width,H=cv.height; ctx.clearRect(0,0,W,H); ctx.fillStyle='#eaf1f3'; ctx.fillRect(0,0,W,H);
 
@@ -436,38 +237,31 @@ function draw(){
   const artH=parseFloat(document.getElementById('h').value)||60;
   const matOn=document.getElementById('matOn').value==='si';
   const mat=matOn?Math.max(0,parseFloat(document.getElementById('mat').value)||0):0;
-  const matColor=document.getElementById('matColor').value || '#f5f5f5';
+  const matColor=document.getElementById('matColor').value||'#f5f5f5';
   const frame=Math.max(0.5,parseFloat(document.getElementById('frame').value)||3);
-  const frameColor=document.getElementById('frameColor').value || '#111111';
+  const frameColor=document.getElementById('frameColor').value||'#111111';
 
   const contentW=artW+2*mat, contentH=artH+2*mat;
   const extW=contentW+2*frame, extH=contentH+2*frame;
 
-  const margin=80; const scale=Math.min((W-2*margin)/extW,(H-2*margin)/extH);
-  const ex=extW*scale, ey=extH*scale; const cx=W/2, cy=H/2;
+  const margin=80;
+  const scale=Math.min((W-2*margin)/extW,(H-2*margin)/extH);
+  const ex=extW*scale, ey=extH*scale;
+  const cx=W/2, cy=H/2;
   const cxw=contentW*scale, cyh=contentH*scale;
-  const fx = cx - ex/2, fy = cy - ey/2;
-  const framePx = Math.max(1, Math.round(frame * scale));
 
-  // Marco
-  if (selectedMold && selectedMoldImg){
-    drawTexturedFrame(fx, fy, ex, ey, framePx, selectedMoldImg, contrastStroke(frameColor));
-  } else {
-    ctx.save();
-    ctx.shadowColor='rgba(0,0,0,.12)'; ctx.shadowBlur=18; ctx.shadowOffsetY=8;
-    const grad=ctx.createLinearGradient(0,fy,0,fy+ey);
-    grad.addColorStop(0,shade(frameColor,18)); grad.addColorStop(0.2,shade(frameColor,8));
-    grad.addColorStop(0.5, validHex(frameColor)?frameColor:'#555555');
-    grad.addColorStop(0.8,shade(frameColor,-10)); grad.addColorStop(1,shade(frameColor,-22));
-    ctx.fillStyle=grad; roundRect(ctx,fx,fy,ex,ey,10); ctx.fill();
-    ctx.restore();
+  // Marco (anillo con volumen)
+  const grad=ctx.createLinearGradient(0,cy-ey/2,0,cy+ey/2);
+  grad.addColorStop(0,shade(frameColor,18));
+  grad.addColorStop(0.2,shade(frameColor,8));
+  grad.addColorStop(0.5,frameColor);
+  grad.addColorStop(0.8,shade(frameColor,-10));
+  grad.addColorStop(1,shade(frameColor,-20));
+  ctx.fillStyle=grad; roundRect(ctx,cx-ex/2,cy-ey/2,ex,ey,8); ctx.fill();
 
-    ctx.save(); ctx.globalCompositeOperation='destination-out';
-    roundRect(ctx,cx-cxw/2,cy-cyh/2,cxw,cyh,8); ctx.fill(); ctx.restore();
-
-    ctx.save(); ctx.lineWidth=2; ctx.strokeStyle=contrastStroke(frameColor);
-    roundRect(ctx,fx,fy,ex,ey,10); ctx.stroke(); ctx.restore();
-  }
+  // recorte interior del marco
+  ctx.save(); ctx.globalCompositeOperation='destination-out';
+  roundRect(ctx,cx-cxw/2,cy-cyh/2,cxw,cyh,6); ctx.fill(); ctx.restore();
 
   // Marialuisa
   if(mat>0){
@@ -475,19 +269,17 @@ function draw(){
     const style = paper ? paper.style : 'smooth';
     const tex = makeTextureCanvas(matColor, style, Math.ceil(cxw), Math.ceil(cyh));
     const pat = ctx.createPattern(tex,'repeat');
-    ctx.fillStyle=pat; roundRect(ctx,cx-cxw/2,cy-cyh/2,cxw,cyh,8); ctx.fill();
-    ctx.save(); ctx.lineWidth=1.2; ctx.strokeStyle='rgba(0,0,0,.14)'; roundRect(ctx,cx-cxw/2,cy-cyh/2,cxw,cyh,8); ctx.stroke(); ctx.restore();
-    // Hueco interior
-    const aw=artW*scale, ah=artH*scale; ctx.save(); ctx.globalCompositeOperation='destination-out';
-    roundRect(ctx,cx-aw/2,cy-ah/2,aw,ah,6); ctx.fill(); ctx.restore();
-    ctx.save(); ctx.lineWidth=1; ctx.strokeStyle='rgba(0,0,0,.18)'; roundRect(ctx,cx-(artW*scale)/2,cy-(artH*scale)/2,artW*scale,ah,6); ctx.stroke(); ctx.restore();
-  } else {
-    ctx.save(); ctx.lineWidth=1; ctx.strokeStyle='rgba(0,0,0,.18)'; roundRect(ctx,cx-(artW*scale)/2,cy-(artH*scale)/2,artW*scale,artH*scale,6); ctx.stroke(); ctx.restore();
+    ctx.fillStyle=pat; roundRect(ctx,cx-cxw/2,cy-cyh/2,cxw,cyh,6); ctx.fill();
+
+    const aw=artW*scale, ah=artH*scale;
+    ctx.save(); ctx.globalCompositeOperation='destination-out';
+    roundRect(ctx,cx-aw/2,cy-ah/2,aw,ah,4); ctx.fill(); ctx.restore();
   }
 
   // Obra
   if(imgLoaded){
-    const aw=artW*scale, ah=artH*scale; ctx.save(); roundRect(ctx,cx-aw/2,cy-ah/2,aw,ah,6); ctx.clip();
+    const aw=artW*scale, ah=artH*scale;
+    ctx.save(); roundRect(ctx,cx-aw/2,cy-ah/2,aw,ah,4); ctx.clip();
     const ir=artImg.naturalWidth/artImg.naturalHeight, ar=aw/ah; let dw,dh;
     if(ir>ar){dh=ah; dw=dh*ir;} else {dw=aw; dh=dw/ir;}
     ctx.drawImage(artImg, cx-dw/2, cy-dh/2, dw, dh); ctx.restore();
@@ -498,13 +290,40 @@ function draw(){
   document.getElementById('vis').textContent = artW.toFixed(1)+' × '+artH.toFixed(1)+(mat>0?` (+ ML ${mat.toFixed(1)} cm)`:'');
 }
 
-/* ================== Acciones ======================= */
+// ===== Acciones =====
 document.getElementById('save').addEventListener('click',()=>{
-  try{
-    const url = cv.toDataURL('image/png');
-    const a=document.createElement('a'); a.download='cotizador_marco.png'; a.href=url; a.click();
-  }catch(e){
-    alert('No se pudo generar el PNG por una textura externa (CORS). Elige una moldura con imagen del mismo sitio o usa color base.');
-  }
+  const a=document.createElement('a'); a.download='cotizador_marco.png'; a.href=cv.toDataURL('image/png'); a.click();
 });
-document.getElementById('re
+
+document.getElementById('reset').addEventListener('click',()=>{
+  imgLoaded=false; artImg.src=''; document.getElementById('file').value=''; draw();
+});
+
+document.getElementById('wa').addEventListener('click',()=>{
+  const name=(document.getElementById('name').value||'').trim(); if(!name){alert('Escribe tu nombre'); return;}
+  const aWcm=parseFloat(document.getElementById('w').value)||40;
+  const aHcm=parseFloat(document.getElementById('h').value)||60;
+  const matOn=document.getElementById('matOn').value==='si';
+  const mat=matOn?(parseFloat(document.getElementById('mat').value)||0):0;
+  const frame=(parseFloat(document.getElementById('frame').value)||3);
+  const contentW=aWcm+2*mat, contentH=aHcm+2*mat;
+  const extW=contentW+2*frame, extH=contentH+2*frame;
+  const matPreset=document.getElementById('matPreset');
+  const matText=matPreset.value?matPreset.selectedOptions[0].text:document.getElementById('matColor').selectedOptions[0].text;
+  const frameColorText=document.getElementById('frameColor').selectedOptions[0].text;
+
+  const msg=`Hola soy ${name}. Quiero cotizar un enmarcado:%0A`+
+            `Obra: ${aWcm}×${aHcm} cm%0A`+
+            `Marialuisa: ${mat>0?(mat+' cm, '+matText):'No'}%0A`+
+            `Marco: ${frame} cm, ${frameColorText}%0A`+
+            `Exterior aprox.: ${extW.toFixed(1)}×${extH.toFixed(1)} cm%0A`+
+            `Nota: Precio aproximado sujeto a tipo de cambio y mercado.`;
+  window.open(`https://wa.me/${BUSINESS_WA}?text=${msg}`,'_blank');
+});
+
+// init
+populate?.(); // por si el fetch falló muy rápido
+draw();
+</script>
+</body>
+</html>
