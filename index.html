@@ -2,6 +2,9 @@
 <html lang="es">
 <head>
 <meta charset="utf-8" />
+<meta http-equiv="Cache-Control" content="no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Cotizador · Marcos Vallarta</title>
 <meta name="color-scheme" content="light" />
@@ -40,7 +43,7 @@ input::file-selector-button{border:0;background:#eef6f7;padding:8px;border-radiu
 #logoBadge{position:absolute;right:10px;bottom:10px;background:rgba(255,255,255,.9);border:1px solid var(--border);border-radius:10px;padding:6px 10px;display:flex;gap:8px;align-items:center}
 #logoBadge img{height:20px;width:auto;display:none}
 
-/* Por si existía alguna marca por CSS en el proyecto */
+/* Por si existía alguna capa antigua de watermark en el DOM */
 .watermark, #watermark, [data-watermark]{display:none!important;opacity:0!important;pointer-events:none!important}
 </style>
 </head>
@@ -504,14 +507,4 @@ document.getElementById('save').addEventListener('click',()=>{
     alert('No se pudo generar el PNG por una textura externa (CORS). Elige una moldura con imagen del mismo sitio o usa color base.');
   }
 });
-document.getElementById('reset').addEventListener('click',()=>{
-  imgLoaded=false; artImg.src=''; document.getElementById('file').value=''; draw();
-});
-document.getElementById('wa').addEventListener('click',()=>{
-  const name=(document.getElementById('name').value||'').trim(); if(!name){alert('Escribe tu nombre'); return;}
-  const aWcm=parseFloat(document.getElementById('w').value)||40;
-  const aHcm=parseFloat(document.getElementById('h').value)||60;
-  const matOn=document.getElementById('matOn').value==='si';
-  const mat=matOn?(parseFloat(document.getElementById('mat').value)||0):0;
-  const frame=(parseFloat(document.getElementById('frame').value)||3);
-  const contentW=aWcm+2*mat,*
+document.getElementById('re
