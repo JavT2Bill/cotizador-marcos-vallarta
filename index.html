@@ -101,7 +101,7 @@ canvas{max-width:100%;width:100%;height:auto;border-radius:16px}
       </div>
       <div>
         <label>Nota</label>
-        <input type="text" value="Costo en WhatsApp con fórmula del proveedor" disabled>
+        <input type="text" value="Se calcula internamente (no se muestra al cliente)" disabled>
       </div>
     </div>
 
@@ -157,9 +157,8 @@ function makeTextureCanvas(color, style='smooth', w=80, h=80){
 }
 function luma(hex){ if(!validHex(hex)) return 128; const c=hex.replace('#',''); const n=parseInt(c.length===3?c.split('').map(x=>x+x).join(''):c,16); const r=(n>>16)&255,g=(n>>8)&255,b=n&255; return 0.2126*r+0.7152*g+0.0722*b; }
 function contrastStroke(hex){ return luma(hex)>200 ? 'rgba(0,0,0,.28)' : 'rgba(255,255,255,.35)'; }
-function money(n){ try{return n.toLocaleString('es-MX',{minimumFractionDigits:0,maximumFractionDigits:0});}catch(e){return Math.round(n).toString();} }
 
-/* ====== Catálogos LITE embebidos (fallback) ====== */
+/* ====== Catálogos LITE embebidos (ampliado) ====== */
 const LITE_PAPERS = [
   {id:"B402",name:"B402 Polar White (Black Core)",color:"#f5f5f5",style:"smooth"},
   {id:"B222",name:"B222 Smooth White",color:"#f7f8f7",style:"smooth"},
@@ -172,16 +171,44 @@ const LITE_PAPERS = [
   {id:"B79", name:"B79 Yorktown Blue",color:"#6289b7",style:"smooth"},
   {id:"B403",name:"B403 Pure White",color:"#ffffff",style:"smooth"}
 ];
+
+// más de 30 molduras de ejemplo (claves proveedor)
 const LITE_MOLDS = [
-  {id:"NEG-30",name:"Negro",width_cm:3,color:"#111111",style:"grain"},
-  {id:"BLA-30",name:"Blanco",width_cm:3,color:"#f5f5f5",style:"grain"},
-  {id:"NOG-35",name:"Nogal",width_cm:3.5,color:"#6b3f21",style:"grain"},
-  {id:"DOR-30",name:"Dorado",width_cm:3,color:"#c7a446",style:"metal"},
-  {id:"PLA-30",name:"Plata",width_cm:3,color:"#c0c0c0",style:"metal"},
-  {id:"GRI-25",name:"Gris",width_cm:2.5,color:"#777777",style:"grain"},
-  {id:"WNG-30",name:"Wengué",width_cm:3,color:"#3a2a1a",style:"grain"},
-  {id:"ROBL-30",name:"Roble",width_cm:3,color:"#916c44",style:"grain"},
-  {id:"BRO-30",name:"Bronce",width_cm:3,color:"#8c6b3f",style:"metal"}
+  {id:"TRA-01",name:"Negro",width_cm:2.0,color:"#111111",style:"grain"},
+  {id:"TRA-02",name:"Nogal",width_cm:2.0,color:"#6b3f21",style:"grain"},
+  {id:"TRA-03",name:"Caoba",width_cm:2.0,color:"#7a3b1f",style:"grain"},
+  {id:"TRA-04",name:"Chocolate",width_cm:2.0,color:"#4b2b1a",style:"grain"},
+  {id:"TRA-05",name:"Nogal",width_cm:2.3,color:"#6b3f21",style:"grain"},
+  {id:"TRA-06",name:"Caoba",width_cm:2.3,color:"#7a3b1f",style:"grain"},
+  {id:"TRA-07",name:"Chocolate",width_cm:2.3,color:"#4b2b1a",style:"grain"},
+  {id:"TRA-08",name:"Nogal",width_cm:3.9,color:"#6b3f21",style:"grain"},
+  {id:"TRA-09",name:"Caoba",width_cm:3.9,color:"#7a3b1f",style:"grain"},
+  {id:"NAT-07",name:"Natural",width_cm:4.4,color:"#c9b18c",style:"grain"},
+  {id:"NAT-08",name:"Maple",width_cm:4.4,color:"#e0b977",style:"grain"},
+  {id:"NAT-09",name:"Natural CV",width_cm:2.8,color:"#cfb48e",style:"grain"},
+  {id:"ENT-12",name:"Negro",width_cm:2.8,color:"#111111",style:"grain"},
+  {id:"ENT-18",name:"Plata",width_cm:2.2,color:"#c0c0c0",style:"metal"},
+  {id:"ENT-22",name:"Dorado",width_cm:2.2,color:"#c7a446",style:"metal"},
+  {id:"POP-01",name:"Rojo",width_cm:9.5,color:"#b8222b",style:"grain"},
+  {id:"POP-02",name:"Naranja",width_cm:9.5,color:"#e67e22",style:"grain"},
+  {id:"POP-03",name:"Amarillo",width_cm:9.5,color:"#f4c542",style:"grain"},
+  {id:"POP-04",name:"Azul Cielo",width_cm:9.5,color:"#7db3e6",style:"grain"},
+  {id:"POP-05",name:"Azul Fuerte",width_cm:9.5,color:"#1f3a5a",style:"grain"},
+  {id:"POP-06",name:"Verde",width_cm:9.5,color:"#2e7d32",style:"grain"},
+  {id:"POP-07",name:"Rosa",width_cm:9.5,color:"#d06aa5",style:"grain"},
+  {id:"POP-08",name:"Blanco",width_cm:9.5,color:"#f5f5f5",style:"grain"},
+  {id:"POP-09",name:"Negro",width_cm:9.5,color:"#111111",style:"grain"},
+  {id:"VLS-01",name:"Oro viejo",width_cm:6.5,color:"#b99652",style:"metal"},
+  {id:"VLS-02",name:"Oro liso",width_cm:6.5,color:"#c7a446",style:"metal"},
+  {id:"VLS-03",name:"Plata vieja",width_cm:6.5,color:"#a8a8a8",style:"metal"},
+  {id:"BN-20",name:"Negro",width_cm:2.0,color:"#111111",style:"grain"},
+  {id:"BN-25",name:"Negro",width_cm:2.5,color:"#111111",style:"grain"},
+  {id:"BN-30",name:"Negro",width_cm:3.0,color:"#111111",style:"grain"},
+  {id:"BL-20",name:"Blanco",width_cm:2.0,color:"#f5f5f5",style:"grain"},
+  {id:"BL-25",name:"Blanco",width_cm:2.5,color:"#f5f5f5",style:"grain"},
+  {id:"BL-30",name:"Blanco",width_cm:3.0,color:"#f5f5f5",style:"grain"},
+  {id:"MET-PL-30",name:"Plata",width_cm:3.0,color:"#c0c0c0",style:"metal"},
+  {id:"MET-BR-30",name:"Bronce",width_cm:3.0,color:"#8c6b3f",style:"metal"}
 ];
 
 /* ====== Carga catálogos externos (/data) ====== */
@@ -196,13 +223,19 @@ Promise.all([
   const info = document.getElementById('catalogInfo');
   if(pp && Array.isArray(pp) && pp.length){ PAPERS = pp; }
   if(mmScraped && Array.isArray(mmScraped) && mmScraped.length){
-    MOLDURAS = mmScraped;
+    MOLDURAS = mergeAndDedupe(LITE_MOLDS, mmScraped);
   } else if(mmManual && Array.isArray(mmManual) && mmManual.length){
-    MOLDURAS = mmManual;
+    MOLDURAS = mergeAndDedupe(LITE_MOLDS, mmManual);
   }
   info.textContent = `Catálogo activo: Cartulinas ${PAPERS.length} · Molduras ${MOLDURAS.length}` + ((pp||mmScraped||mmManual)?' (desde /data)':' (embebido)');
   populate();
 }).catch(()=>populate());
+
+function mergeAndDedupe(a,b){
+  const map=new Map();
+  [...a,...b].forEach(m=>{ if(m && m.id) map.set(m.id, {...map.get(m.id), ...m}); });
+  return [...map.values()];
+}
 
 /* ====================== UI ========================= */
 function setDynamicOption(selectId, value, label, attrName){
@@ -228,7 +261,6 @@ function populate(){
   matPreset.onchange = ()=>{
     const it = PAPERS.find(x=>x.id===matPreset.value);
     if(!it) return;
-    // si el color no existe en el combo, lo insertamos como "Del catálogo"
     setDynamicOption('matColor', it.color, 'Del catálogo', 'data-mat');
     draw();
   };
@@ -317,7 +349,8 @@ function draw(){
 
   // contorno adaptativo del marco
   ctx.save(); ctx.lineWidth=2; ctx.strokeStyle=contrastStroke(frameColor);
-  roundRect(ctx,cx-ex/2,cy-ey/2,ex,ey,8); ctx.stroke(); ctx.restore();
+  roundRect(ctx,cx-ex/2,cy-ey/2,ex,ey,8); ctx.stroke();
+  ctx.restore();
 
   // marialuisa
   if(mat>0){
@@ -375,22 +408,30 @@ document.getElementById('wa').addEventListener('click',()=>{
   const contentW=aWcm+2*mat, contentH=aHcm+2*mat;
   const extW=contentW+2*frame, extH=contentH+2*frame;
 
-  // vidrio: fórmula del proveedor
+  // vidrio: SOLO indicamos tipo (sin precio para el cliente)
   const glass=document.getElementById('glass').value;
-  let glassText='No', glassCost=0;
-  if(glass==='2mm'){ glassText='2 mm'; glassCost=0.04*aWcm*aHcm; }
-  if(glass==='3mm'){ glassText='3 mm'; glassCost=0.06*aWcm*aHcm; }
+  let glassText='No';
+  if(glass==='2mm'){ glassText='2 mm'; }
+  if(glass==='3mm'){ glassText='3 mm'; }
+
+  // info de moldura para que cotices rápido
+  const moldSelEl = document.getElementById('moldSel');
+  const moldId = moldSelEl.value || '';
+  const moldItem = moldId ? MOLDURAS.find(x=>x.id===moldId) : null;
+  const moldLine = moldItem
+    ? `${moldItem.id} · ${moldItem.name}${moldItem.width_cm?` · ${moldItem.width_cm} cm`:''}`
+    : 'Sin seleccionar';
 
   const matPreset=document.getElementById('matPreset');
   const matText=mat>0 ? (matPreset.value?matPreset.selectedOptions[0].text:document.getElementById('matColor').selectedOptions[0]?.text||'Del catálogo') : 'No';
   const frameColorText=document.getElementById('frameColor').selectedOptions[0]?.text || 'Del catálogo';
-  const glassLine=(glass==='none')?'No':`${glassText} — aprox $${money(glassCost)} MXN`;
 
   const rawMsg = `Hola soy ${name}. Quiero cotizar un enmarcado:
 Obra: ${aWcm}×${aHcm} cm
 Marialuisa: ${mat>0?(mat+' cm, '+matText):'No'}
-Marco: ${frame} cm, ${frameColorText}
-Vidrio: ${glassLine}
+Moldura (catálogo): ${moldLine}
+Marco (perfil/color): ${frame} cm, ${frameColorText}
+Vidrio: ${glassText}
 Exterior aprox.: ${extW.toFixed(1)}×${extH.toFixed(1)} cm
 Nota: Precio aproximado sujeto a tipo de cambio y mercado.`;
 
