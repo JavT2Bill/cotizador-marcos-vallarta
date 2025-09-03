@@ -1,10 +1,13 @@
 <!DOCTYPE html>
-<html lang="es"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cotizador Marcos Vallarta · Live</title>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cotizador · Marcos Vallarta</title>
 <style>
-:root{--brand:#41b8c4;--ink:#142022;--bg:#f7f9fa;--card:#fff;--border:#dfe6ea}
-*{box-sizing:border-box}body{margin:0;font-family:system-ui,Segoe UI,Roboto,Inter,Arial;background:var(--bg);color:var(--ink)}
+:root{--brand:#20b6c1;--ink:#142022;--bg:#f7f9fa;--card:#fff;--border:#dfe6ea}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,Segoe UI,Roboto,Inter,Arial;background:var(--bg);color:var(--ink)}
 header{display:flex;gap:10px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border);background:#fff}
 main{display:grid;grid-template-columns:360px 1fr;gap:16px;padding:16px;min-height:calc(100dvh - 60px)}
 @media(max-width:980px){main{grid-template-columns:1fr}}
@@ -25,7 +28,7 @@ canvas{max-width:100%;width:100%;height:auto;border-radius:16px}
 </head>
 <body>
 <header>
-  <strong>Marcos Vallarta</strong><span style="color:#5d7378">· Cotizador (Live)</span>
+  <strong>Marcos Vallarta</strong><span style="color:#5d7378">· Cotizador</span>
 </header>
 
 <main>
@@ -86,7 +89,6 @@ canvas{max-width:100%;width:100%;height:auto;border-radius:16px}
     </div>
     <small id="catalogInfo"></small>
 
-    <!-- 3.1) VIDRIO -->
     <hr><h3>3.1) Vidrio</h3>
     <div class="row">
       <div>
@@ -99,7 +101,7 @@ canvas{max-width:100%;width:100%;height:auto;border-radius:16px}
       </div>
       <div>
         <label>Nota</label>
-        <input type="text" value="Se calcula con fórmula del proveedor" disabled>
+        <input type="text" value="Costo en WhatsApp con fórmula del proveedor" disabled>
       </div>
     </div>
 
@@ -124,15 +126,14 @@ canvas{max-width:100%;width:100%;height:auto;border-radius:16px}
 </main>
 
 <script>
-// ===== Config =====
+/* ====================== Config ====================== */
 const BUSINESS_WA = '523329231790';
 
-// ===== Util =====
+/* ====================== Util ======================== */
 const cv = document.getElementById('cv'); const ctx = cv.getContext('2d');
 const artImg = new Image(); let imgLoaded = false;
 
-// Validación/transformación de colores
-function validHex(h){ return /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(h||''); }
+function validHex(h){return /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(h||'');}
 function shade(hex,pct){
   if(!validHex(hex)) hex='#555555';
   const c=hex.replace('#','');const num=parseInt(c.length===3?c.split('').map(x=>x+x).join(''):c,16);
@@ -148,22 +149,17 @@ function makeTextureCanvas(color, style='smooth', w=80, h=80){
   g.fillStyle=validHex(color)?color:'#dddddd'; g.fillRect(0,0,w,h);
   if(style==='linen'){g.strokeStyle='rgba(0,0,0,.08)'; for(let i=0;i<w;i+=6){g.beginPath();g.moveTo(i,0);g.lineTo(i,h);g.stroke();}
                       g.strokeStyle='rgba(255,255,255,.07)'; for(let j=0;j<h;j+=6){g.beginPath();g.moveTo(0,j);g.lineTo(w,j);g.stroke();}}
-  if(style==='speckle'){g.fillStyle='rgba(0,0,0,.12)'; for(let k=0;k<420;k++){const x=Math.random()*w,y=Math.random()*h; g.fillRect(x,y,1,1);}}
+  if(style==='speckle'){g.fillStyle='rgba(0,0,0,.12)'; for(let k=0;k<420;k++){g.fillRect(Math.random()*w,Math.random()*h,1,1);}}
   if(style==='fiber'){g.strokeStyle='rgba(0,0,0,.12)'; for(let k=0;k<28;k++){const x1=Math.random()*w,y1=Math.random()*h,x2=x1+Math.random()*20,y2=y1+Math.random()*6; g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();}}
   if(style==='metal'){for(let y=0;y<h;y++){const s=200+25*Math.sin(y/6); g.fillStyle=`rgb(${s|0},${s|0},${s|0})`; g.fillRect(0,y,w,1);} }
   if(style==='grain'){g.fillStyle='rgba(255,255,255,.05)'; for(let y=0;y<h;y+=2){g.fillRect(0,y,w,1);} g.fillStyle='rgba(0,0,0,.04)'; for(let x=0;x<w;x+=6){g.fillRect(x,0,1,h);} }
   return c;
 }
-function luma(hex){
-  if(!validHex(hex)) return 128;
-  const c=hex.replace('#',''); const num=parseInt(c.length===3?c.split('').map(x=>x+x).join(''):c,16);
-  const r=(num>>16)&255,g=(num>>8)&255,b=num&255;
-  return 0.2126*r+0.7152*g+0.0722*b;
-}
+function luma(hex){ if(!validHex(hex)) return 128; const c=hex.replace('#',''); const n=parseInt(c.length===3?c.split('').map(x=>x+x).join(''):c,16); const r=(n>>16)&255,g=(n>>8)&255,b=n&255; return 0.2126*r+0.7152*g+0.0722*b; }
 function contrastStroke(hex){ return luma(hex)>200 ? 'rgba(0,0,0,.28)' : 'rgba(255,255,255,.35)'; }
 function money(n){ try{return n.toLocaleString('es-MX',{minimumFractionDigits:0,maximumFractionDigits:0});}catch(e){return Math.round(n).toString();} }
 
-// ===== Catálogos LITE embebidos (fallback) =====
+/* ====== Catálogos LITE embebidos (fallback) ====== */
 const LITE_PAPERS = [
   {id:"B402",name:"B402 Polar White (Black Core)",color:"#f5f5f5",style:"smooth"},
   {id:"B222",name:"B222 Smooth White",color:"#f7f8f7",style:"smooth"},
@@ -177,84 +173,99 @@ const LITE_PAPERS = [
   {id:"B403",name:"B403 Pure White",color:"#ffffff",style:"smooth"}
 ];
 const LITE_MOLDS = [
-  {id:"NEG-30",name:"Negro · 3 cm",width_cm:3,color:"#111111",style:"grain"},
-  {id:"NEG-40",name:"Negro · 4 cm",width_cm:4,color:"#111111",style:"grain"},
-  {id:"BLA-30",name:"Blanco · 3 cm",width_cm:3,color:"#f5f5f5",style:"grain"},
-  {id:"NOG-35",name:"Nogal · 3.5 cm",width_cm:3.5,color:"#6b3f21",style:"grain"},
-  {id:"DOR-30",name:"Dorado · 3 cm",width_cm:3,color:"#c7a446",style:"metal"},
-  {id:"PLA-30",name:"Plata · 3 cm",width_cm:3,color:"#c0c0c0",style:"metal"},
-  {id:"GRI-25",name:"Gris · 2.5 cm",width_cm:2.5,color:"#777777",style:"grain"},
-  {id:"WNG-30",name:"Wengué · 3 cm",width_cm:3,color:"#3a2a1a",style:"grain"},
-  {id:"ROBL-30",name:"Roble · 3 cm",width_cm:3,color:"#916c44",style:"grain"},
-  {id:"ANT-35",name:"Antique Gold · 3.5 cm",width_cm:3.5,color:"#b99652",style:"metal"},
-  {id:"BRO-30",name:"Bronce · 3.0 cm",width_cm:3,color:"#8c6b3f",style:"metal"}
+  {id:"NEG-30",name:"Negro",width_cm:3,color:"#111111",style:"grain"},
+  {id:"BLA-30",name:"Blanco",width_cm:3,color:"#f5f5f5",style:"grain"},
+  {id:"NOG-35",name:"Nogal",width_cm:3.5,color:"#6b3f21",style:"grain"},
+  {id:"DOR-30",name:"Dorado",width_cm:3,color:"#c7a446",style:"metal"},
+  {id:"PLA-30",name:"Plata",width_cm:3,color:"#c0c0c0",style:"metal"},
+  {id:"GRI-25",name:"Gris",width_cm:2.5,color:"#777777",style:"grain"},
+  {id:"WNG-30",name:"Wengué",width_cm:3,color:"#3a2a1a",style:"grain"},
+  {id:"ROBL-30",name:"Roble",width_cm:3,color:"#916c44",style:"grain"},
+  {id:"BRO-30",name:"Bronce",width_cm:3,color:"#8c6b3f",style:"metal"}
 ];
 
-// ===== Carga catálogos externos (/data) =====
+/* ====== Carga catálogos externos (/data) ====== */
 const BASE = location.pathname.replace(/[^/]+$/, '');
 let PAPERS = [...LITE_PAPERS], MOLDURAS = [...LITE_MOLDS];
 
 Promise.all([
   fetch(BASE+'data/cartulinas.json').then(r=>r.ok?r.json():null).catch(()=>null),
+  fetch(BASE+'data/molduras_scraped.json').then(r=>r.ok?r.json():null).catch(()=>null),
   fetch(BASE+'data/molduras.json').then(r=>r.ok?r.json():null).catch(()=>null),
-]).then(([pp,mm])=>{
+]).then(([pp,mmScraped,mmManual])=>{
   const info = document.getElementById('catalogInfo');
   if(pp && Array.isArray(pp) && pp.length){ PAPERS = pp; }
-  if(mm && Array.isArray(mm) && mm.length){ MOLDURAS = mm; }
-  info.textContent = `Catálogo activo: Cartulinas ${PAPERS.length} · Molduras ${MOLDURAS.length}` + ((pp||mm)?' (desde /data)':' (embebido)');
+  if(mmScraped && Array.isArray(mmScraped) && mmScraped.length){
+    MOLDURAS = mmScraped;
+  } else if(mmManual && Array.isArray(mmManual) && mmManual.length){
+    MOLDURAS = mmManual;
+  }
+  info.textContent = `Catálogo activo: Cartulinas ${PAPERS.length} · Molduras ${MOLDURAS.length}` + ((pp||mmScraped||mmManual)?' (desde /data)':' (embebido)');
   populate();
 }).catch(()=>populate());
 
-// ===== UI =====
-function applyCatalogColor(hex){
-  const sel=document.getElementById('frameColor');
-  // crea/actualiza la opción "Del catálogo" con el HEX real
-  let opt=sel.querySelector('option[data-catalog]');
+/* ====================== UI ========================= */
+function setDynamicOption(selectId, value, label, attrName){
+  const sel=document.getElementById(selectId);
+  let opt=sel.querySelector(`option[${attrName}]`);
   if(!opt){
     opt=document.createElement('option');
-    opt.setAttribute('data-catalog','1');
-    opt.textContent='Del catálogo';
-    sel.prepend(opt); // la ponemos arriba
+    opt.setAttribute(attrName,'1');
+    opt.textContent=label;
+    sel.prepend(opt);
   }
-  opt.value = validHex(hex)?hex:'#111111';
-  sel.value = opt.value; // selecciona esa opción
+  opt.value=value;
+  sel.value=value;
+}
+function applyCatalogColor(hex){
+  setDynamicOption('frameColor', validHex(hex)?hex:'#111111', 'Del catálogo', 'data-catalog');
 }
 
 function populate(){
+  // Preajustes de marialuisa
   const matPreset = document.getElementById('matPreset');
   matPreset.innerHTML = '<option value="">— Elegir —</option>' + PAPERS.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
   matPreset.onchange = ()=>{
     const it = PAPERS.find(x=>x.id===matPreset.value);
     if(!it) return;
-    document.getElementById('matColor').value = it.color;
+    // si el color no existe en el combo, lo insertamos como "Del catálogo"
+    setDynamicOption('matColor', it.color, 'Del catálogo', 'data-mat');
     draw();
   };
 
+  // Selector de molduras (clave + nombre + ancho)
   const moldSel = document.getElementById('moldSel');
-  moldSel.innerHTML = '<option value="">— Elegir —</option>' + MOLDURAS.map(m=>`<option value="${m.id}">${m.name}</option>`).join('');
+  moldSel.innerHTML = '<option value="">— Elegir —</option>' +
+    MOLDURAS.map(m => `<option value="${m.id}">${m.id} · ${m.name}${m.width_cm?` · ${m.width_cm} cm`:''}</option>`).join('');
+
   moldSel.onchange = ()=>{
     const m = MOLDURAS.find(x=>x.id===moldSel.value);
+    const t = document.getElementById('moldThumb'), g=t.getContext('2d');
+    g.clearRect(0,0,t.width,t.height);
+
     if(m){
       document.getElementById('frame').value = m.width_cm || 3;
-      applyCatalogColor(m.color || '#111111');  // 👈 clave del arreglo
-      // miniatura
-      const t = document.getElementById('moldThumb'), g=t.getContext('2d');
-      g.clearRect(0,0,t.width,t.height);
-      const tex = makeTextureCanvas(m.color, m.style||'grain', t.width, t.height);
-      g.drawImage(tex,0,0);
-    } else {
-      const t = document.getElementById('moldThumb'), g=t.getContext('2d'); g.clearRect(0,0,t.width,t.height);
+      applyCatalogColor(m.color || '#111111');
+      if (m.img){
+        const pic = new Image();
+        pic.onload = ()=>{ g.drawImage(pic,0,0,t.width,t.height); };
+        pic.onerror = ()=>{ const tx = makeTextureCanvas(m.color, m.style||'grain', t.width, t.height); g.drawImage(tx,0,0); };
+        pic.src = m.img;
+      } else {
+        const tx = makeTextureCanvas(m.color, m.style||'grain', t.width, t.height);
+        g.drawImage(tx,0,0);
+      }
     }
     draw();
   };
 }
 
-// escuchar cambios (incluye vidrio)
+// escuchar cambios
 ['w','h','mat','frame','matOn','matColor','frameColor','glass'].forEach(id=>{
   document.getElementById(id).addEventListener('input',draw);
 });
 
-// carga de imagen (redimensiona si es muy grande)
+// carga de imagen con reducción si es gigante
 document.getElementById('file').addEventListener('change',e=>{
   const f=e.target.files&&e.target.files[0]; if(!f) return;
   const url=URL.createObjectURL(f);
@@ -273,18 +284,16 @@ document.getElementById('file').addEventListener('change',e=>{
   tmp.src=url;
 });
 
-// ===== RENDER con alto contraste =====
+/* ===================== RENDER ====================== */
 function draw(){
   const W=cv.width,H=cv.height; ctx.clearRect(0,0,W,H); ctx.fillStyle='#eaf1f3'; ctx.fillRect(0,0,W,H);
   const artW=parseFloat(document.getElementById('w').value)||40;
   const artH=parseFloat(document.getElementById('h').value)||60;
   const matOn=document.getElementById('matOn').value==='si';
   const mat=matOn?Math.max(0,parseFloat(document.getElementById('mat').value)||0):0;
-  const matColor=document.getElementById('matColor').value;
+  const matColor=document.getElementById('matColor').value || '#f5f5f5';
   const frame=Math.max(0.5,parseFloat(document.getElementById('frame').value)||3);
-
-  // usa el color del select (que ahora tendrá "Del catálogo" con HEX válido)
-  const frameColor = document.getElementById('frameColor').value || '#111111';
+  const frameColor=document.getElementById('frameColor').value || '#111111';
 
   const contentW=artW+2*mat, contentH=artH+2*mat;
   const extW=contentW+2*frame, extH=contentH+2*frame;
@@ -307,10 +316,8 @@ function draw(){
   roundRect(ctx,cx-cxw/2,cy-cyh/2,cxw,cyh,6); ctx.fill(); ctx.restore();
 
   // contorno adaptativo del marco
-  ctx.save();
-  ctx.lineWidth=2; ctx.strokeStyle=contrastStroke(frameColor);
-  roundRect(ctx,cx-ex/2,cy-ey/2,ex,ey,8); ctx.stroke();
-  ctx.restore();
+  ctx.save(); ctx.lineWidth=2; ctx.strokeStyle=contrastStroke(frameColor);
+  roundRect(ctx,cx-ex/2,cy-ey/2,ex,ey,8); ctx.stroke(); ctx.restore();
 
   // marialuisa
   if(mat>0){
@@ -332,7 +339,7 @@ function draw(){
     ctx.save(); ctx.lineWidth=1; ctx.strokeStyle='rgba(0,0,0,.18)';
     roundRect(ctx,cx-(artW*scale)/2,cy-(artH*scale)/2,artW*scale,artH*scale,4); ctx.stroke(); ctx.restore();
   } else {
-    // borde mínimo de la obra si no hay ML
+    // borde de la obra si no hay ML
     ctx.save(); ctx.lineWidth=1; ctx.strokeStyle='rgba(0,0,0,.18)';
     roundRect(ctx,cx-(artW*scale)/2,cy-(artH*scale)/2,artW*scale,artH*scale,4); ctx.stroke(); ctx.restore();
   }
@@ -349,15 +356,15 @@ function draw(){
   document.getElementById('vis').textContent = artW.toFixed(1)+' × '+artH.toFixed(1)+(mat>0?` (+ ML ${mat.toFixed(1)} cm)`:'');
 }
 
-// guardar PNG
+/* ================== Acciones ======================= */
 document.getElementById('save').addEventListener('click',()=>{
   const a=document.createElement('a'); a.download='cotizador_marco.png'; a.href=cv.toDataURL('image/png'); a.click();
 });
 
-// reset
-document.getElementById('reset').addEventListener('click',()=>{imgLoaded=false; artImg.src=''; document.getElementById('file').value=''; draw();});
+document.getElementById('reset').addEventListener('click',()=>{
+  imgLoaded=false; artImg.src=''; document.getElementById('file').value=''; draw();
+});
 
-// WhatsApp (incluye vidrio con tu fórmula)
 document.getElementById('wa').addEventListener('click',()=>{
   const name=(document.getElementById('name').value||'').trim(); if(!name){alert('Escribe tu nombre'); return;}
   const aWcm=parseFloat(document.getElementById('w').value)||40;
@@ -368,28 +375,31 @@ document.getElementById('wa').addEventListener('click',()=>{
   const contentW=aWcm+2*mat, contentH=aHcm+2*mat;
   const extW=contentW+2*frame, extH=contentH+2*frame;
 
-  // Vidrio (cálculo simple proveedor)
+  // vidrio: fórmula del proveedor
   const glass=document.getElementById('glass').value;
   let glassText='No', glassCost=0;
   if(glass==='2mm'){ glassText='2 mm'; glassCost=0.04*aWcm*aHcm; }
   if(glass==='3mm'){ glassText='3 mm'; glassCost=0.06*aWcm*aHcm; }
 
   const matPreset=document.getElementById('matPreset');
-  const matText=mat>0 ? (matPreset.value?matPreset.selectedOptions[0].text:document.getElementById('matColor').selectedOptions[0].text) : 'No';
+  const matText=mat>0 ? (matPreset.value?matPreset.selectedOptions[0].text:document.getElementById('matColor').selectedOptions[0]?.text||'Del catálogo') : 'No';
   const frameColorText=document.getElementById('frameColor').selectedOptions[0]?.text || 'Del catálogo';
+  const glassLine=(glass==='none')?'No':`${glassText} — aprox $${money(glassCost)} MXN`;
 
-  const glassLine = (glass==='none') ? 'No' : `${glassText} — aprox $${money(glassCost)} MXN`;
+  const rawMsg = `Hola soy ${name}. Quiero cotizar un enmarcado:
+Obra: ${aWcm}×${aHcm} cm
+Marialuisa: ${mat>0?(mat+' cm, '+matText):'No'}
+Marco: ${frame} cm, ${frameColorText}
+Vidrio: ${glassLine}
+Exterior aprox.: ${extW.toFixed(1)}×${extH.toFixed(1)} cm
+Nota: Precio aproximado sujeto a tipo de cambio y mercado.`;
 
-  const msg=`Hola soy ${name}. Quiero cotizar un enmarcado:%0A`
-    + `Obra: ${aWcm}×${aHcm} cm%0A`
-    + `Marialuisa: ${mat>0?(mat+' cm, '+matText):'No'}%0A`
-    + `Marco: ${frame} cm, ${frameColorText}%0A`
-    + `Vidrio: ${glassLine}%0A`
-    + `Exterior aprox.: ${extW.toFixed(1)}×${extH.toFixed(1)} cm%0A`
-    + `Nota: Precio aproximado sujeto a tipo de cambio y mercado.`;
-
+  const msg = encodeURIComponent(rawMsg);
   window.open(`https://wa.me/${BUSINESS_WA}?text=${msg}`,'_blank');
 });
 
+/* init */
 draw();
 </script>
+</body>
+</html>
