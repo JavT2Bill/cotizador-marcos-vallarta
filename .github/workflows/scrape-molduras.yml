@@ -1,0 +1,36 @@
+name: Scrape molduras
+
+on:
+  workflow_dispatch: {}  # lo ejecutas a mano desde la pestaña Actions
+
+permissions:
+  contents: write  # para poder commitear imágenes/JSON al repo
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: pip install -q requests beautifulsoup4 lxml
+
+      - name: Run scraper
+        run: python scripts/scrape_molduras.py
+
+      - name: Commit images & JSON
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No hay cambios que commitear."
+          else
+            git commit -m "Scrape molduras: agrega/actualiza imágenes y mapping"
+            git push
+          fi
