@@ -39,6 +39,9 @@ input::file-selector-button{border:0;background:#eef6f7;padding:8px;border-radiu
 .search input{flex:1}
 #logoBadge{position:absolute;right:10px;bottom:10px;background:rgba(255,255,255,.9);border:1px solid var(--border);border-radius:10px;padding:6px 10px;display:flex;gap:8px;align-items:center}
 #logoBadge img{height:20px;width:auto;display:none}
+
+/* Por si existía alguna marca por CSS en el proyecto */
+.watermark, #watermark, [data-watermark]{display:none!important;opacity:0!important;pointer-events:none!important}
 </style>
 </head>
 <body>
@@ -254,7 +257,6 @@ const BASE = location.pathname.replace(/[^/]+$/, '');
 let PAPERS = [...LITE_PAPERS], MOLDURAS = [...LITE_MOLDS];
 
 const normalizeId = id => (id||'').toString().toUpperCase().replace(/[^A-Z0-9]/g,'');
-
 function mergeAndDedupeNormalized(baseArr, ...others){
   const map = new Map();
   const take = (m) => {
@@ -291,7 +293,7 @@ Promise.all([
 let selectedMold = null;
 let selectedMoldImg = null;
 
-/* ====================== UI ========================= */
+/* ====================== Helpers ===================== */
 function setDynamicOption(selectId, value, label, attrName){
   const sel=document.getElementById(selectId);
   let opt=sel.querySelector(`option[${attrName}]`);
@@ -301,7 +303,11 @@ function setDynamicOption(selectId, value, label, attrName){
 function applyCatalogColor(hex){
   setDynamicOption('frameColor', validHex(hex)?hex:'#111111', 'Del catálogo', 'data-catalog');
 }
+function sameOrigin(src){
+  try{ return new URL(src, location.href).origin === location.origin; }catch(e){ return false; }
+}
 
+/* ====================== UI ========================= */
 function populate(){
   // ML
   const matPreset = document.getElementById('matPreset');
@@ -332,7 +338,6 @@ function rebuildMoldSelect(list){
   const cur = moldSel.value;
   moldSel.innerHTML = '<option value="">— Elegir —</option>' +
     list.map(m => `<option value="${m.id}">${m.id} · ${m.name}${m.width_cm?` · ${m.width_cm} cm`:''}</option>`).join('');
-  // mantener selección si existe
   if(cur && list.some(x=>x.id===cur)) moldSel.value = cur;
 
   moldSel.onchange = ()=>{
@@ -345,7 +350,9 @@ function rebuildMoldSelect(list){
     if(m){
       document.getElementById('frame').value = m.width_cm || 3;
       applyCatalogColor(m.color || '#111111');
-      if (m.img){
+
+      // Si la imagen proviene de otro dominio, evitamos CORS y usamos textura sintética
+      if (m.img && sameOrigin(m.img)){
         const pic = new Image();
         pic.crossOrigin = "anonymous";
         pic.onload = ()=>{ g.drawImage(pic,0,0,t.width,t.height); selectedMoldImg = pic; draw(); };
@@ -418,26 +425,6 @@ function drawTexturedFrame(x, y, w, h, b, img, strokeColor){
   ctx.restore();
 }
 
-/* =================== Watermark sobre el simulador =================== */
-function drawWatermark(W,H){
-  ctx.save();
-  ctx.translate(W/2,H/2);
-  ctx.rotate(-Math.PI/6);
-  ctx.globalAlpha = 0.10;
-  ctx.fillStyle = '#0e1f23';
-  ctx.textAlign='center';
-  ctx.textBaseline='middle';
-  ctx.font = '700 42px system-ui, Segoe UI, Inter';
-  const text = 'Marcos Vallarta · +52 33 2923 1790';
-  const step = 260;
-  for(let y=-H; y<H; y+=step){
-    for(let x=-W; x<W; x+=step){
-      ctx.fillText(text, x, y);
-    }
-  }
-  ctx.restore();
-}
-
 /* ===================== RENDER ====================== */
 function draw(){
   const W=cv.width,H=cv.height; ctx.clearRect(0,0,W,H); ctx.fillStyle='#eaf1f3'; ctx.fillRect(0,0,W,H);
@@ -459,7 +446,7 @@ function draw(){
   const fx = cx - ex/2, fy = cy - ey/2;
   const framePx = Math.max(1, Math.round(frame * scale));
 
-  // Marco: con textura si tenemos imagen; de lo contrario, gradiente
+  // Marco
   if (selectedMold && selectedMoldImg){
     drawTexturedFrame(fx, fy, ex, ey, framePx, selectedMoldImg, contrastStroke(frameColor));
   } else {
@@ -490,7 +477,7 @@ function draw(){
     // Hueco interior
     const aw=artW*scale, ah=artH*scale; ctx.save(); ctx.globalCompositeOperation='destination-out';
     roundRect(ctx,cx-aw/2,cy-ah/2,aw,ah,6); ctx.fill(); ctx.restore();
-    ctx.save(); ctx.lineWidth=1; ctx.strokeStyle='rgba(0,0,0,.18)'; roundRect(ctx,cx-(artW*scale)/2,cy-(artH*scale)/2,artW*scale,artH*scale,6); ctx.stroke(); ctx.restore();
+    ctx.save(); ctx.lineWidth=1; ctx.strokeStyle='rgba(0,0,0,.18)'; roundRect(ctx,cx-(artW*scale)/2,cy-(artH*scale)/2,artW*scale,ah,6); ctx.stroke(); ctx.restore();
   } else {
     ctx.save(); ctx.lineWidth=1; ctx.strokeStyle='rgba(0,0,0,.18)'; roundRect(ctx,cx-(artW*scale)/2,cy-(artH*scale)/2,artW*scale,artH*scale,6); ctx.stroke(); ctx.restore();
   }
@@ -503,9 +490,6 @@ function draw(){
     ctx.drawImage(artImg, cx-dw/2, cy-dh/2, dw, dh); ctx.restore();
   }
 
-  // Watermark de seguridad
-  drawWatermark(W,H);
-
   // KPIs
   document.getElementById('ext').textContent = extW.toFixed(1)+' × '+extH.toFixed(1);
   document.getElementById('vis').textContent = artW.toFixed(1)+' × '+artH.toFixed(1)+(mat>0?` (+ ML ${mat.toFixed(1)} cm)`:'');
@@ -513,7 +497,12 @@ function draw(){
 
 /* ================== Acciones ======================= */
 document.getElementById('save').addEventListener('click',()=>{
-  const a=document.createElement('a'); a.download='cotizador_marco.png'; a.href=cv.toDataURL('image/png'); a.click();
+  try{
+    const url = cv.toDataURL('image/png');
+    const a=document.createElement('a'); a.download='cotizador_marco.png'; a.href=url; a.click();
+  }catch(e){
+    alert('No se pudo generar el PNG por una textura externa (CORS). Elige una moldura con imagen del mismo sitio o usa color base.');
+  }
 });
 document.getElementById('reset').addEventListener('click',()=>{
   imgLoaded=false; artImg.src=''; document.getElementById('file').value=''; draw();
@@ -525,36 +514,4 @@ document.getElementById('wa').addEventListener('click',()=>{
   const matOn=document.getElementById('matOn').value==='si';
   const mat=matOn?(parseFloat(document.getElementById('mat').value)||0):0;
   const frame=(parseFloat(document.getElementById('frame').value)||3);
-  const contentW=aWcm+2*mat, contentH=aHcm+2*mat;
-  const extW=contentW+2*frame, extH=contentH+2*frame;
-
-  const glass=document.getElementById('glass').value;
-  let glassText='No'; if(glass==='2mm'){ glassText='2 mm'; } if(glass==='3mm'){ glassText='3 mm'; }
-
-  const moldSelEl = document.getElementById('moldSel');
-  const moldId = moldSelEl.value || '';
-  const moldItem = moldId ? MOLDURAS.find(x=>x.id===moldId) : null;
-  const moldLine = moldItem ? `${moldItem.id} · ${moldItem.name}${moldItem.width_cm?` · ${moldItem.width_cm} cm`:''}` : 'Sin seleccionar';
-
-  const matPreset=document.getElementById('matPreset');
-  const matText=mat>0 ? (matPreset.value?matPreset.selectedOptions[0].text:document.getElementById('matColor').selectedOptions[0]?.text||'Del catálogo') : 'No';
-  const frameColorText=document.getElementById('frameColor').selectedOptions[0]?.text || 'Del catálogo';
-
-  const rawMsg = `Hola soy ${name}. Quiero cotizar un enmarcado:
-Obra: ${aWcm}×${aHcm} cm
-Marialuisa: ${mat>0?(mat+' cm, '+matText):'No'}
-Moldura (catálogo): ${moldLine}
-Marco (perfil/color): ${frame} cm, ${frameColorText}
-Vidrio: ${glassText}
-Exterior aprox.: ${extW.toFixed(1)}×${extH.toFixed(1)} cm
-Nota: Precio aproximado sujeto a tipo de cambio y mercado.`;
-
-  const msg = encodeURIComponent(rawMsg);
-  window.open(`https://wa.me/${BUSINESS_WA}?text=${msg}`,'_blank');
-});
-
-/* init */
-draw();
-</script>
-</body>
-</html>
+  const contentW=aWcm+2*mat,*
