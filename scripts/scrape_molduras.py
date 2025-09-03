@@ -16,7 +16,10 @@ from bs4 import BeautifulSoup as BS
 BASE = "https://www.marcosymarcos.mx/"
 CATEGORIAS = [
     "https://www.marcosymarcos.mx/categoria/molduras/poliestireno/",
-    # Agrega más categorías si quieres cubrir todo
+    "https://www.marcosymarcos.mx/categoria/molduras/poliestireno/versalles/",
+    "https://www.marcosymarcos.mx/categoria/molduras/poliestireno/coleccion-molduras-marcos-atenas/",
+]
+# Agrega más categorías si quieres cubrir todo
     # "https://www.marcosymarcos.mx/categoria/molduras/",
 ]
 
