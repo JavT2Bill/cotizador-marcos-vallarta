@@ -24,8 +24,7 @@ canvas{max-width:100%;width:100%;height:auto;border-radius:16px}
 .kpi{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
 .kpi>div{background:#f2f7f8;border:1px solid var(--border);border-radius:10px;padding:8px;text-align:center}
 .badge{display:inline-block;background:#e9f6f8;border:1px solid var(--border);padding:2px 8px;border-radius:999px;color:#0d3136;font-size:12px}
-
-/* si existiera alguna capa/estilo de watermark residual en el DOM */
+/* por si quedara alguna marca vieja */
 .watermark,#watermark,[data-watermark]{display:none!important;opacity:0!important;pointer-events:none!important}
 </style>
 </head>
@@ -86,10 +85,23 @@ canvas{max-width:100%;width:100%;height:auto;border-radius:16px}
         </select>
       </div>
     </div>
+
     <div class="row" style="margin-top:6px">
       <div><label>Moldura del catálogo</label><select id="moldSel"></select></div>
-      <div><label>Miniatura</label><canvas id="moldThumb" width="120" height="40" style="border:1px solid var(--border);border-radius:8px"></canvas></div>
+      <div><label>Miniatura / Textura</label><canvas id="moldThumb" width="120" height="40" style="border:1px solid var(--border);border-radius:8px"></canvas></div>
     </div>
+
+    <div class="row" style="margin-top:6px">
+      <div>
+        <label>Foto de moldura (individual) — opcional</label>
+        <input id="moldImg" type="file" accept="image/*">
+      </div>
+      <div>
+        <label>Sprite 2×2 (4 esquinas) — auto</label>
+        <input id="moldSprite" type="file" accept="image/*">
+      </div>
+    </div>
+
     <small id="catalogInfo"></small>
 
     <hr><h3>4) WhatsApp</h3>
@@ -119,21 +131,61 @@ const BUSINESS_WA = '523329231790';
 // ===== Util =====
 const cv = document.getElementById('cv'); const ctx = cv.getContext('2d');
 const artImg = new Image(); let imgLoaded = false;
+
 function shade(hex,pct){const c=hex.replace('#','');const num=parseInt(c.length===3?c.split('').map(x=>x+x).join(''):c,16);let r=(num>>16)&255,g=(num>>8)&255,b=num&255;r=Math.min(255,Math.max(0,Math.round(r+(pct/100)*255)));g=Math.min(255,Math.max(0,Math.round(g+(pct/100)*255)));b=Math.min(255,Math.max(0,Math.round(b+(pct/100)*255)));return '#'+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1);}
 function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();}
+
 function makeTextureCanvas(color, style='smooth', w=80, h=80){
   const c=document.createElement('canvas'); c.width=w; c.height=h; const g=c.getContext('2d');
-  g.fillStyle=color; g.fillRect(0,0,w,h);
+  g.fillStyle=color||'#dddddd'; g.fillRect(0,0,w,h);
   if(style==='linen'){g.strokeStyle='rgba(0,0,0,.08)'; for(let i=0;i<w;i+=6){g.beginPath();g.moveTo(i,0);g.lineTo(i,h);g.stroke();}
                       g.strokeStyle='rgba(255,255,255,.07)'; for(let j=0;j<h;j+=6){g.beginPath();g.moveTo(0,j);g.lineTo(w,j);g.stroke();}}
-  if(style==='speckle'){g.fillStyle='rgba(0,0,0,.12)'; for(let k=0;k<420;k++){const x=Math.random()*w,y=Math.random()*h; g.fillRect(x,y,1,1);}}
+  if(style==='speckle'){g.fillStyle='rgba(0,0,0,.12)'; for(let k=0;k<420;k++){g.fillRect(Math.random()*w,Math.random()*h,1,1);}}
   if(style==='fiber'){g.strokeStyle='rgba(0,0,0,.12)'; for(let k=0;k<28;k++){const x1=Math.random()*w,y1=Math.random()*h,x2=x1+Math.random()*20,y2=y1+Math.random()*6; g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();}}
   if(style==='metal'){for(let y=0;y<h;y++){const s=200+25*Math.sin(y/6); g.fillStyle=`rgb(${s|0},${s|0},${s|0})`; g.fillRect(0,y,w,1);} }
   if(style==='grain'){g.fillStyle='rgba(255,255,255,.05)'; for(let y=0;y<h;y+=2){g.fillRect(0,y,w,1);} g.fillStyle='rgba(0,0,0,.04)'; for(let x=0;x<w;x+=6){g.fillRect(x,0,1,h);} }
   return c;
 }
 
-// ===== Catálogos LITE embebidos =====
+// Marco con textura real, eligiendo franjas por offsets (evita cortar la esquina)
+function drawTexturedFrame(x, y, w, h, borderPx, img, opts={}){
+  const side = Math.max(1, Math.floor(borderPx));
+  const HOFF = Math.min(0.95, Math.max(0.05, opts.hoff ?? 0.5)); // 0..1
+  const VOFF = Math.min(0.95, Math.max(0.05, opts.voff ?? 0.5));
+
+  // TOP/BOTTOM -> franja horizontal
+  const sliceH = Math.max(8, Math.floor((img.height||200)*0.25));
+  const sy = Math.round(((img.height||200) - sliceH) * VOFF);
+  const tTop = document.createElement('canvas');
+  tTop.width = Math.max(64, img.width||256); tTop.height = side;
+  tTop.getContext('2d').drawImage(img, 0, sy, img.width||256, sliceH, 0, 0, tTop.width, side);
+  ctx.fillStyle = ctx.createPattern(tTop, 'repeat');
+  ctx.fillRect(x, y, w, side);
+  ctx.fillRect(x, y+h-side, w, side);
+
+  // LEFT/RIGHT -> franja vertical
+  const sliceW = Math.max(8, Math.floor((img.width||200)*0.25));
+  const sx = Math.round(((img.width||200) - sliceW) * HOFF);
+  const tLeft = document.createElement('canvas');
+  tLeft.width = side; tLeft.height = Math.max(64, img.height||256);
+  tLeft.getContext('2d').drawImage(img, sx, 0, sliceW, img.height||256, 0, 0, side, tLeft.height);
+  ctx.fillStyle = ctx.createPattern(tLeft, 'repeat');
+  ctx.fillRect(x, y+side, side, h-2*side);
+  ctx.fillRect(x+w-side, y+side, side, h-2*side);
+
+  // Hueco interior
+  ctx.save(); ctx.globalCompositeOperation='destination-out';
+  ctx.fillRect(x+side, y+side, w-2*side, h-2*side);
+  ctx.restore();
+
+  // Bordes finos
+  ctx.save(); ctx.strokeStyle='rgba(0,0,0,.25)'; ctx.lineWidth=1.2;
+  ctx.strokeRect(x+0.5, y+0.5, w-1, h-1);
+  ctx.strokeRect(x+side+0.5, y+side+0.5, w-2*side-1, h-2*side-1);
+  ctx.restore();
+}
+
+// ===== Catálogos base =====
 const LITE_PAPERS = [
   {id:"B402",name:"B402 Polar White (Black Core)",color:"#f5f5f5",style:"smooth"},
   {id:"B222",name:"B222 Smooth White",color:"#f7f8f7",style:"smooth"},
@@ -164,20 +216,32 @@ const LITE_MOLDS = [
 const BASE = location.pathname.replace(/[^/]+$/, '');
 let PAPERS = [...LITE_PAPERS], MOLDURAS = [...LITE_MOLDS];
 
+// estado selección
+let selectedMold = null;
+let selectedMoldImg = null;
+
 Promise.all([
   fetch(BASE+'data/cartulinas.json').then(r=>r.ok?r.json():null).catch(()=>null),
   fetch(BASE+'data/molduras.json').then(r=>r.ok?r.json():null).catch(()=>null),
 ]).then(([pp,mm])=>{
   const info = document.getElementById('catalogInfo');
   if(pp && Array.isArray(pp) && pp.length){ PAPERS = pp; }
-  if(mm && Array.isArray(mm) && mm.length){ MOLDURAS = mm; }
+  if(mm && Array.isArray(mm) && mm.length){ MOLDURAS = mm; } // soporta "img","hoff","voff"
   info.textContent = `Catálogo activo: Cartulinas ${PAPERS.length} · Molduras ${MOLDURAS.length}` + ((pp||mm)?' (desde /data)':' (embebido)');
   populate();
 }).catch(()=>populate());
 
 // ===== UI =====
+function rebuildMoldSelect(){
+  const moldSel = document.getElementById('moldSel');
+  const cur = moldSel.value;
+  moldSel.innerHTML = '<option value="">— Elegir —</option>' +
+    MOLDURAS.map(m=>`<option value="${m.id}">${m.id} · ${m.name}${m.width_cm?` · ${m.width_cm} cm`:''}</option>`).join('');
+  if(cur && MOLDURAS.some(x=>x.id===cur)) moldSel.value = cur;
+}
+
 function populate(){
-  // presets de marialuisa
+  // presets ML
   const matPreset = document.getElementById('matPreset');
   matPreset.innerHTML = '<option value="">— Elegir —</option>' + PAPERS.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
   matPreset.onchange = ()=>{
@@ -187,30 +251,36 @@ function populate(){
     draw();
   };
 
-  // molduras
-  const moldSel = document.getElementById('moldSel');
-  moldSel.innerHTML = '<option value="">— Elegir —</option>' + MOLDURAS.map(m=>`<option value="${m.id}">${m.name}</option>`).join('');
-  moldSel.onchange = ()=>{
-    const m = MOLDURAS.find(x=>x.id===moldSel.value);
-    const t = document.getElementById('moldThumb'), g=t.getContext('2d');
-    g.clearRect(0,0,t.width,t.height);
+  rebuildMoldSelect();
 
+  // selección de moldura
+  const moldSel = document.getElementById('moldSel');
+  moldSel.onchange = ()=>{
+    const m = MOLDURAS.find(x=>x.id===moldSel.value) || null;
+    selectedMold = m; selectedMoldImg = null;
+    const t = document.getElementById('moldThumb'), g=t.getContext('2d'); g.clearRect(0,0,t.width,t.height);
     if(m){
       document.getElementById('frame').value = m.width_cm ?? 3;
       document.getElementById('frameColor').value = m.color ?? '#111111';
-      const tex = makeTextureCanvas(m.color ?? '#111111', m.style ?? 'grain', t.width, t.height);
-      g.drawImage(tex,0,0);
+      if(m.img){
+        const img = new Image();
+        img.onload=()=>{ selectedMoldImg = img; g.drawImage(img,0,0,t.width,t.height); draw(); };
+        img.onerror=()=>{ const tex = makeTextureCanvas(m.color ?? '#111', m.style ?? 'grain', t.width, t.height); g.drawImage(tex,0,0); draw(); };
+        img.src = m.img;
+      }else{
+        const tex = makeTextureCanvas(m.color ?? '#111', m.style ?? 'grain', t.width, t.height); g.drawImage(tex,0,0);
+      }
     }
     draw();
   };
 }
 
-// cambios que redibujan
+// eventos que redibujan
 ['w','h','mat','frame','matOn','matColor','frameColor'].forEach(id=>{
   document.getElementById(id).addEventListener('input',draw);
 });
 
-// carga de imagen con escalado si es enorme
+// obra
 document.getElementById('file').addEventListener('change',e=>{
   const f=e.target.files&&e.target.files[0]; if(!f) return;
   const url=URL.createObjectURL(f);
@@ -227,6 +297,62 @@ document.getElementById('file').addEventListener('change',e=>{
     artImg.src=src;
   };
   tmp.src=url;
+});
+
+// foto individual de moldura
+document.getElementById('moldImg').addEventListener('change',e=>{
+  const f=e.target.files&&e.target.files[0]; if(!f) return;
+  const url=URL.createObjectURL(f);
+  const img = new Image();
+  img.onload = ()=>{
+    selectedMoldImg = img;
+    const t = document.getElementById('moldThumb'), g=t.getContext('2d');
+    g.clearRect(0,0,t.width,t.height);
+    g.drawImage(img,0,0,t.width,t.height);
+    draw();
+  };
+  img.src = url;
+});
+
+// sprite 2x2 con 4 esquinas (auto)
+document.getElementById('moldSprite').addEventListener('change',e=>{
+  const f=e.target.files&&e.target.files[0]; if(!f) return;
+  const url=URL.createObjectURL(f);
+  const img = new Image();
+  img.onload = ()=>{
+    const W = img.width, H = img.height;
+    const halves = [
+      {id:"VLS-06",name:"Versalles 06",hoff:0.12,voff:0.12, color:"#111111"},
+      {id:"VLS-07",name:"Versalles 07",hoff:0.88,voff:0.12, color:"#c0c0c0"},
+      {id:"VLS-08",name:"Versalles 08",hoff:0.12,voff:0.88, color:"#111111"},
+      {id:"VLS-10",name:"Versalles 10",hoff:0.88,voff:0.88, color:"#6b1f1f"}
+    ];
+    const boxes = [
+      {x:0,y:0,w:W/2,h:H/2},           // TL -> VLS-06
+      {x:W/2,y:0,w:W/2,h:H/2},         // TR -> VLS-07
+      {x:0,y:H/2,w:W/2,h:H/2},         // BL -> VLS-08
+      {x:W/2,y:H/2,w:W/2,h:H/2}        // BR -> VLS-10
+    ];
+    const added = [];
+    boxes.forEach((b,i)=>{
+      const off=document.createElement('canvas'); off.width=b.w; off.height=b.h;
+      off.getContext('2d').drawImage(img,b.x,b.y,b.w,b.h,0,0,b.w,b.h);
+      const dataURL = off.toDataURL('image/jpeg',0.92);
+      const meta = halves[i];
+      added.push({
+        id: meta.id, name: meta.name, width_cm: 6.5, color: meta.color,
+        style:'ornate', img: dataURL, hoff: meta.hoff, voff: meta.voff
+      });
+    });
+    // inserta al comienzo del catálogo
+    MOLDURAS = [...added, ...MOLDURAS];
+    rebuildMoldSelect();
+    document.getElementById('catalogInfo').textContent =
+      `Catálogo activo: Cartulinas ${PAPERS.length} · Molduras ${MOLDURAS.length} (incluye 4 desde sprite)`;
+    // selecciona la primera para que se vea ya
+    const moldSel = document.getElementById('moldSel'); moldSel.value = 'VLS-06'; moldSel.onchange();
+  };
+  img.src = url;
 });
 
 // ===== Render =====
@@ -250,18 +376,24 @@ function draw(){
   const cx=W/2, cy=H/2;
   const cxw=contentW*scale, cyh=contentH*scale;
 
-  // Marco (anillo con volumen)
-  const grad=ctx.createLinearGradient(0,cy-ey/2,0,cy+ey/2);
-  grad.addColorStop(0,shade(frameColor,18));
-  grad.addColorStop(0.2,shade(frameColor,8));
-  grad.addColorStop(0.5,frameColor);
-  grad.addColorStop(0.8,shade(frameColor,-10));
-  grad.addColorStop(1,shade(frameColor,-20));
-  ctx.fillStyle=grad; roundRect(ctx,cx-ex/2,cy-ey/2,ex,ey,8); ctx.fill();
+  const framePx = Math.max(1, Math.round(frame*scale));
+  const fx = cx - ex/2, fy = cy - ey/2;
 
-  // recorte interior del marco
-  ctx.save(); ctx.globalCompositeOperation='destination-out';
-  roundRect(ctx,cx-cxw/2,cy-cyh/2,cxw,cyh,6); ctx.fill(); ctx.restore();
+  // Marco: textura real (con offsets) o gradiente
+  if(selectedMoldImg){
+    const opts = {hoff: selectedMold?.hoff ?? 0.5, voff: selectedMold?.voff ?? 0.5};
+    drawTexturedFrame(fx, fy, ex, ey, framePx, selectedMoldImg, opts);
+  }else{
+    const grad=ctx.createLinearGradient(0,cy-ey/2,0,cy+ey/2);
+    grad.addColorStop(0,shade(frameColor,18));
+    grad.addColorStop(0.2,shade(frameColor,8));
+    grad.addColorStop(0.5,frameColor);
+    grad.addColorStop(0.8,shade(frameColor,-10));
+    grad.addColorStop(1,shade(frameColor,-20));
+    ctx.fillStyle=grad; roundRect(ctx,fx,fy,ex,ey,8); ctx.fill();
+    ctx.save(); ctx.globalCompositeOperation='destination-out';
+    roundRect(ctx,cx-cxw/2,cy-cyh/2,cxw,cyh,6); ctx.fill(); ctx.restore();
+  }
 
   // Marialuisa
   if(mat>0){
@@ -270,16 +402,13 @@ function draw(){
     const tex = makeTextureCanvas(matColor, style, Math.ceil(cxw), Math.ceil(cyh));
     const pat = ctx.createPattern(tex,'repeat');
     ctx.fillStyle=pat; roundRect(ctx,cx-cxw/2,cy-cyh/2,cxw,cyh,6); ctx.fill();
-
-    const aw=artW*scale, ah=artH*scale;
-    ctx.save(); ctx.globalCompositeOperation='destination-out';
+    const aw=artW*scale, ah=artH*scale; ctx.save(); ctx.globalCompositeOperation='destination-out';
     roundRect(ctx,cx-aw/2,cy-ah/2,aw,ah,4); ctx.fill(); ctx.restore();
   }
 
   // Obra
   if(imgLoaded){
-    const aw=artW*scale, ah=artH*scale;
-    ctx.save(); roundRect(ctx,cx-aw/2,cy-ah/2,aw,ah,4); ctx.clip();
+    const aw=artW*scale, ah=artH*scale; ctx.save(); roundRect(ctx,cx-aw/2,cy-ah/2,aw,ah,4); ctx.clip();
     const ir=artImg.naturalWidth/artImg.naturalHeight, ar=aw/ah; let dw,dh;
     if(ir>ar){dh=ah; dw=dh*ir;} else {dw=aw; dh=dw/ir;}
     ctx.drawImage(artImg, cx-dw/2, cy-dh/2, dw, dh); ctx.restore();
@@ -292,11 +421,17 @@ function draw(){
 
 // ===== Acciones =====
 document.getElementById('save').addEventListener('click',()=>{
-  const a=document.createElement('a'); a.download='cotizador_marco.png'; a.href=cv.toDataURL('image/png'); a.click();
+  try{
+    const a=document.createElement('a'); a.download='cotizador_marco.png'; a.href=cv.toDataURL('image/png'); a.click();
+  }catch(e){
+    alert('No se pudo generar el PNG por una textura externa. Usa imágenes del mismo sitio o la opción de cargar sprite/foto.');
+  }
 });
 
 document.getElementById('reset').addEventListener('click',()=>{
-  imgLoaded=false; artImg.src=''; document.getElementById('file').value=''; draw();
+  imgLoaded=false; artImg.src=''; document.getElementById('file').value='';
+  selectedMoldImg=null; document.getElementById('moldImg').value=''; document.getElementById('moldSprite').value='';
+  draw();
 });
 
 document.getElementById('wa').addEventListener('click',()=>{
@@ -322,7 +457,6 @@ document.getElementById('wa').addEventListener('click',()=>{
 });
 
 // init
-populate?.(); // por si el fetch falló muy rápido
 draw();
 </script>
 </body>
